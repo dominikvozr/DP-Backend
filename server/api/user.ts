@@ -3,6 +3,14 @@ import User from './../models/User';
 
 const router = express.Router();
 
+router.get('/check-authorization', async (req, res, next) => {
+  try {
+    res.json({ isAuthorized: req.user ? true : false, user: req.user || null });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/get-user', async (req, res, next) => {
   try {
     res.json({ user: req.user || null });

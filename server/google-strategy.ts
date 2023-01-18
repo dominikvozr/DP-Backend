@@ -71,7 +71,7 @@ const setupGoogleOAuth = ({ server }) => {
     (_, res) => {
 
     // Successful authentication, redirect home.
-    res.redirect(`${process.env.URL_APP}/dashboard`);
+    res.redirect(`${process.env.URL_APP}`);
   });
 }
 

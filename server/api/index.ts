@@ -10,8 +10,13 @@ function handleError(err, _, res, __) {
   res.json({ error: err.message || err.toString() });
 }
 
+const isAuthenticated = (req, res, next) => {
+  if (req.user === null) res.sendStatus(401)
+  else next()
+}
+
 export default function api(server: express.Express) {
   server.use('/api/v1/public', publicExpressRoutes, handleError);
-  server.use('/api/v1/team-member', teamMemberExpressRoutes, handleError);
-  server.use('/api/v1/user', userExpressRoutes, handleError);
+  server.use('/api/v1/team-member', isAuthenticated, teamMemberExpressRoutes, handleError);
+  server.use('/api/v1/user', isAuthenticated, userExpressRoutes, handleError);
 }
