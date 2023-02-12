@@ -3,44 +3,124 @@ import * as mongoose from 'mongoose';
 //import { generateSlug } from '../utils/slugify';
 
 const examSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  userId: {
+    type: String,
+    required: true,
+  },
+  pipelineId: {
+    type: String,
+    required: true,
+  },
+  templateId: {
+    type: String,
+    required: true,
+  },
+  subject: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  projectRepo: {
+    type: String,
+  },
+  testRepo: {
+    type: String,
+  },
   slug: {
     type: String,
     required: true,
     unique: true,
   },
+  startsAt: {
+    type: Date,
+    required: true,
+  },
+  endsAt: {
+    type: Date,
+    required: true,
+  },
   createdAt: {
     type: Date,
     required: true,
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  displayName: String,
-  avatarUrl: String,
 });
 
 interface ExamDocument extends mongoose.Document {
-  slug: string;
-  createdAt: Date;
-  email: string;
-  displayName: string;
-  avatarUrl: string;
+  name: string,
+  userId: string,
+  pipelineId: string,
+  templateId: string,
+  subject: string,
+  description: string,
+  projectRepo: string,
+  testRepo: string,
+  slug: string,
+  startsAt: Date,
+  endsAt: Date,
+  createdAt: Date,
 }
 
 interface ExamModel extends mongoose.Model<ExamDocument> {
-  getUserBySlug({ slug }: { slug: string }): Promise<ExamDocument>;
+  //getUserBySlug({ slug }: { slug: string }): Promise<ExamDocument>;
 
-  updateProfile({
-    userId,
+  getExamsByUser({ userId }: { userId: string }): Promise<ExamDocument[]>;
+
+  updateExam({
+    examId,
     name,
-    avatarUrl,
+    pipelineId,
+    templateId,
+    subject,
+    description,
+    projectRepo,
+    testRepo,
+    slug,
+    startsAt,
+    endsAt,
   }: {
-    userId: string;
-    name: string;
-    avatarUrl: string;
+    examId: string;
+    name: string,
+    pipelineId: string,
+    templateId: string,
+    subject: string,
+    description: string,
+    projectRepo: string,
+    testRepo: string,
+    slug: string,
+    startsAt: Date,
+    endsAt: Date,
   }): Promise<ExamDocument[]>;
+
+  createExam({
+    examName,
+    description,
+    subject,
+    startDate,
+    endDate,
+    project,
+    tests,
+    pipelineId,
+    templateId,
+    slug
+  }: {
+    examName: string,
+    description: string,
+    subject: string,
+    startDate: Date,
+    endDate: Date,
+    project: string,
+    tests: string,
+    pipelineId: string,
+    templateId: string,
+    slug: string,
+  }, user: Express.User): Promise<ExamDocument[]>;
 }
 
 class ExamClass extends mongoose.Model {
@@ -48,6 +128,15 @@ class ExamClass extends mongoose.Model {
     console.log('Static method: getUserBySlug');
 
     return this.findOne({ slug }, 'email displayName avatarUrl').setOptions({ lean: true });
+  }
+
+  public static async createExam(data, user) {
+    console.log('Static method: createExam');
+
+    data = data['userId'] = user._id
+
+    const exam = await this.insertMany([data])
+    return exam
   }
 
   public static async updateProfile({ userId, name, avatarUrl }) {
@@ -72,6 +161,6 @@ class ExamClass extends mongoose.Model {
 
 examSchema.loadClass(ExamClass);
 
-const Exam = mongoose.model<ExamDocument, ExamModel>('User', examSchema);
+const Exam = mongoose.model<ExamDocument, ExamModel>('Exam', examSchema);
 
 export default Exam;
