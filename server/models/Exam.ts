@@ -38,16 +38,20 @@ const examSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  startsAt: {
+  startDate: {
     type: Date,
     required: true,
   },
-  endsAt: {
+  endDate: {
     type: Date,
     required: true,
   },
   createdAt: {
     type: Date,
+    required: true,
+  },
+  points: {
+    type: Number,
     required: true,
   },
 });
@@ -62,9 +66,10 @@ interface ExamDocument extends mongoose.Document {
   projectRepo: string,
   testRepo: string,
   slug: string,
-  startsAt: Date,
-  endsAt: Date,
+  startDate: Date,
+  endDate: Date,
   createdAt: Date,
+  points: number,
 }
 
 interface ExamModel extends mongoose.Model<ExamDocument> {
@@ -132,6 +137,8 @@ class ExamClass extends mongoose.Model {
 
   public static async createExam(data, user) {
     console.log('Static method: createExam');
+
+    //const slug = generateSlug()
 
     data = data['userId'] = user._id
 

@@ -11,8 +11,6 @@ function handleError(err, _, res, __) {
 }
 
 const isAuthenticated = (req, res, next) => {
-  console.log(req);
-
   if (req.user === null) res.sendStatus(401)
   else next()
 }
@@ -20,5 +18,5 @@ const isAuthenticated = (req, res, next) => {
 export default function api(server: express.Express) {
   server.use('/api/v1/public', publicExpressRoutes, handleError);
   server.use('/api/v1/user', isAuthenticated, userExpressRoutes, handleError);
-  server.use('/api/v1/professor', isAuthenticated, professorApi, handleError);
+  server.use('/api/v1/professor/test', isAuthenticated, professorApi, handleError);
 }

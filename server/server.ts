@@ -5,6 +5,9 @@ import * as mongoose from 'mongoose';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const MongoStore = require('connect-mongo')(session);
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bodyParser = require('body-parser')
+
 import { setupGoogleOAuth } from "./google-strategy";
 import api from './api';
 
@@ -16,8 +19,8 @@ mongoose.connect(process.env.MONGO_DB_TEST);
 // create express server
 const server = express();
 server.use(express.json());
-
-
+server.use(bodyParser.json()) // for parsing application/json
+server.use(bodyParser.urlencoded({ extended: true }))
 
 // CORS settings
 server.use(
