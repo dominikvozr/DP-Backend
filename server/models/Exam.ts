@@ -1,11 +1,12 @@
 // import * as _ from 'lodash';
 import * as mongoose from 'mongoose';
-//import { generateSlug } from '../utils/slugify';
+import { generateSlug } from '../utils/slugify';
 
 const examSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    unique: true,
   },
   userId: {
     type: String,
@@ -30,8 +31,14 @@ const examSchema = new mongoose.Schema({
   projectRepo: {
     type: String,
   },
-  testRepo: {
+  project: {
+    type: Object,
+  },
+  testsRepo: {
     type: String,
+  },
+  testsFile: {
+    type: Object,
   },
   slug: {
     type: String,
@@ -54,6 +61,12 @@ const examSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  tests: [{
+    id: String,
+    name: String,
+    points: Number,
+  }],
+  isOpen: Boolean
 });
 
 interface ExamDocument extends mongoose.Document {
@@ -70,6 +83,12 @@ interface ExamDocument extends mongoose.Document {
   endDate: Date,
   createdAt: Date,
   points: number,
+  tests: [{
+    id: number,
+    name: string,
+    points: number,
+  }],
+  isOpen: boolean,
 }
 
 interface ExamModel extends mongoose.Model<ExamDocument> {
@@ -77,9 +96,11 @@ interface ExamModel extends mongoose.Model<ExamDocument> {
 
   getExamsByUser({ userId }: { userId: string }): Promise<ExamDocument[]>;
 
+  getExams(): Promise<ExamDocument[]>;
+
   updateExam({
-    examId,
     name,
+    userId,
     pipelineId,
     templateId,
     subject,
@@ -87,11 +108,14 @@ interface ExamModel extends mongoose.Model<ExamDocument> {
     projectRepo,
     testRepo,
     slug,
-    startsAt,
-    endsAt,
+    startDate,
+    endDate,
+    createdAt,
+    points,
+    tests,
   }: {
-    examId: string;
     name: string,
+    userId: string,
     pipelineId: string,
     templateId: string,
     subject: string,
@@ -99,32 +123,43 @@ interface ExamModel extends mongoose.Model<ExamDocument> {
     projectRepo: string,
     testRepo: string,
     slug: string,
-    startsAt: Date,
-    endsAt: Date,
+    startDate: Date,
+    endDate: Date,
+    createdAt: Date,
+    points: number,
+    tests: Array<object>,
   }): Promise<ExamDocument[]>;
 
   createExam({
-    examName,
-    description,
-    subject,
-    startDate,
-    endDate,
-    project,
-    tests,
+    name,
+    userId,
     pipelineId,
     templateId,
-    slug
+    subject,
+    description,
+    projectRepo,
+    testRepo,
+    slug,
+    startDate,
+    endDate,
+    createdAt,
+    points,
+    tests,
   }: {
-    examName: string,
-    description: string,
-    subject: string,
-    startDate: Date,
-    endDate: Date,
-    project: string,
-    tests: string,
+    name: string,
+    userId: string,
     pipelineId: string,
     templateId: string,
+    subject: string,
+    description: string,
+    projectRepo: string,
+    testRepo: string,
     slug: string,
+    startDate: Date,
+    endDate: Date,
+    createdAt: Date,
+    points: number,
+    tests: Array<object>,
   }, user: Express.User): Promise<ExamDocument[]>;
 }
 
@@ -135,15 +170,29 @@ class ExamClass extends mongoose.Model {
     return this.findOne({ slug }, 'email displayName avatarUrl').setOptions({ lean: true });
   }
 
+  public static async getExams() {
+    const exams = await this.find()
+    return exams
+  }
+
   public static async createExam(data, user) {
     console.log('Static method: createExam');
+    console.log(data, user);
 
-    //const slug = generateSlug()
+    const slug = await generateSlug(this, data.name);
 
-    data = data['userId'] = user._id
+    data['userId'] = user._id
+    data['slug'] = slug
+    data['createdAt'] = new Date()
+    data['isOpen'] = true
+
+    data.startDate.replace(' ', 'T')
+    data.startDate = new Date(data.startDate)
+    data.endDate.replace(' ', 'T')
+    data.endDate = new Date(data.endDate)
 
     const exam = await this.insertMany([data])
-    return exam
+    return exam[0]
   }
 
   public static async updateProfile({ userId, name, avatarUrl }) {

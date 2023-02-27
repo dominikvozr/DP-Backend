@@ -1,7 +1,8 @@
 import * as express from 'express';
 
 import publicExpressRoutes from './public';
-import professorApi from './professor';
+import professorExamApi from './professor';
+import professorPipelineApi from './pipeline';
 import userExpressRoutes from './user';
 
 function handleError(err, _, res, __) {
@@ -18,5 +19,6 @@ const isAuthenticated = (req, res, next) => {
 export default function api(server: express.Express) {
   server.use('/api/v1/public', publicExpressRoutes, handleError);
   server.use('/api/v1/user', isAuthenticated, userExpressRoutes, handleError);
-  server.use('/api/v1/professor/test', isAuthenticated, professorApi, handleError);
+  server.use('/api/v1/professor/exam', isAuthenticated, professorExamApi, handleError);
+  server.use('/api/v1/pipeline', isAuthenticated, professorPipelineApi, handleError);
 }

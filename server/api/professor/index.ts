@@ -20,7 +20,7 @@ interface MulterRequest extends express.Request {
 
 // Multer storage initialization
 const storage = multer.diskStorage({
-  destination: 'upload/',
+  destination: 'upload/test/',
   filename: (_req, file, callback) => {
     const originalName = file.originalname;
     const extension = originalName.substring(originalName.lastIndexOf('.'));
@@ -37,16 +37,23 @@ const router = express.Router();
 
 
 
-router.post('/create', async (req, res, next) => {
+router.post('/create', async (req: express.Request, res, next) => {
   try {
-
     const exam = await Exam.createExam(req.body, req.user);
-
-    res.json(exam);
+    res.json({exam, message: 'success'});
   } catch (err) {
     next(err);
   }
 });
+
+router.get('/index', async (req, res, next) => {
+  try {
+    const exams = await Exam.getExams();
+    res.json({user: req.user, exams, isAuthorized: true});
+  } catch (err) {
+    next(err);
+  }
+})
 
 router.post('/upload/project', upload.single('project'), (req: MulterRequest, res, next) => {
   try {

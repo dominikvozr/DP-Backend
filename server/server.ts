@@ -61,24 +61,15 @@ if (server.get('env') === 'production') {
   sessionOptions.cookie['secure'] = true // serve secure cookies
 }
 
-
-
+server.get('/test', (_, res) => {
+  console.log('API server got request from APP server or browser');
+  res.json('test');
+});
 
 // Google authentication
 setupGoogleOAuth({ server })
 // API routes
 api(server);
-
-
-
-
-server.get('/api/v1/public/get-user', (_, res) => {
-  /* const collection = client.db('sample_airbnb').collection('listingsAndReviews').find();
-  console.log(collection); */
-
-  console.log('API server got request from APP server or browser');
-  res.json({ user: { email: 'team@builderbook.org' } });
-});
 
 
 
