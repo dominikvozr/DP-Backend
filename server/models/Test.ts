@@ -1,15 +1,22 @@
 // import * as _ from 'lodash';
 import * as mongoose from 'mongoose';
+//import async from 'async'
 import { generateSlug } from '../utils/slugify';
+//import Exam from './Exam';
 
 const testSchema = new mongoose.Schema({
-  userId: {
-    type: String,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
-  examId: {
-    type: String,
+  exam: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Exam",
     required: true,
+  },
+  examSlug: {
+    type: String,
   },
   testRepo: {
     type: String,
@@ -22,35 +29,42 @@ const testSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  score: [{
+  score: {
     points: Number,
     message: String,
     percentage: Number,
     mark: String,
-  }],
+    time: Date,
+  },
   isOpen: Boolean,
 });
 
 interface TestDocument extends mongoose.Document {
-  userId: string,
-  examId: string,
+  user: mongoose.Schema.Types.ObjectId,
+  exam: mongoose.Schema.Types.ObjectId,
+  examSlug: string,
   testRepo: string,
   slug: string,
   startedAt: Date,
   endedAt: Date,
-  score: [{
+  score: {
     points: number,
     message: string,
     percentage: number,
     mark: string,
-  }],
+    time: Date,
+  },
   isOpen: boolean,
 }
 
 interface TestModel extends mongoose.Model<TestDocument> {
-  //getUserBySlug({ slug }: { slug: string }): Promise<TestDocument>;
-
   getTestsByUser({ userId }: { userId: string }): Promise<TestDocument[]>;
+
+  getTests(user: any): Promise<TestDocument[]>;
+
+  getTestById(id: string, user: any): Promise<TestDocument>;
+
+  getTestByExamSlug(id: string, user: any): Promise<TestDocument>;
 
   updateTest({
     userId,
@@ -70,7 +84,7 @@ interface TestModel extends mongoose.Model<TestDocument> {
     endedAt: Date,
     score: Array<object>,
     isOpen: boolean,
-  }): Promise<TestDocument[]>;
+  }): Promise<TestDocument>;
 
   createTest({
     userId,
@@ -90,15 +104,54 @@ interface TestModel extends mongoose.Model<TestDocument> {
     endedAt: Date,
     score: Array<object>,
     isOpen: boolean,
-  }, user: Express.User): Promise<TestDocument[]>;
+  }, user: Express.User): Promise<TestDocument>;
+
+  deleteTest({
+    id
+  }: {
+    id: string
+  }, user: Express.User): Promise<TestDocument>;
 }
 
 class TestClass extends mongoose.Model {
-  public static async getUserBySlug({ slug }) {
-    console.log('Static method: getUserBySlug');
+  public static async getTests(user: any) {
+    const exams = await this.find({'user': user._id}).populate('user')
+    /* async.waterfall(
+    [
+        function(callback) {
+          Test.find({userId: user.id}, callback);
+        },
+        function(tests,callback) {
+            Exam.find({
+              "test": { "$in": tests.map(function(el) {
+                  return el._id
+              })
+          }, callback});
+        }
+    ],
+    function(err, results) {
+       if (err) {
+          // do something
+       } else {
+        console.log(results);
 
+          // results are the matching entries
+       }
+    }) */
 
-    return this.findOne({ slug }, 'email displayName avatarUrl').setOptions({ lean: true });
+    return exams
+  }
+
+  public static async getTestById(id: string, user: any) {
+    const test = await this.findById(id).exec();
+    if(test.userId == user.id)
+      return test
+    else
+      return 'forbidden'
+  }
+
+  public static async getTestByExamSlug(slug: string, user: any) {
+    return await this.find({examSlug: slug, userId: user.id});
   }
 
   public static async createTest(data, user) {
@@ -107,7 +160,7 @@ class TestClass extends mongoose.Model {
 
     const slug = await generateSlug(this, data.name);
 
-    data['userId'] = user._id
+    data['user'] = user._id
     data['slug'] = slug
     data['createdAt'] = new Date()
 
@@ -115,7 +168,7 @@ class TestClass extends mongoose.Model {
     return exam
   }
 
-  public static async updateProfile({ userId, name, avatarUrl }) {
+  /* public static async updateTest({ userId, name, avatarUrl }) {
     console.log('Static method: updateProfile');
 
     const user = await this.findById(userId, 'slug displayName');
@@ -132,7 +185,7 @@ class TestClass extends mongoose.Model {
     return this.findByIdAndUpdate(userId, { $set: modifier }, { new: true, runValidators: true })
       .select('displayName avatarUrl slug')
       .setOptions({ lean: true });
-  }
+  } */
 }
 
 testSchema.loadClass(TestClass);

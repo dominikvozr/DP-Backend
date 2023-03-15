@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import * as cors from 'cors';
 import * as express from 'express';
 import * as session from 'express-session';
 import * as mongoose from 'mongoose';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+//const requestId = require('express-request-id');
+const requestReceived = require('request-received');
+const responseTime = require('response-time');
+const Cabin = require('cabin');
+const { Signale } = require('signale');
 const MongoStore = require('connect-mongo')(session);
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const bodyParser = require('body-parser')
 
 import { setupGoogleOAuth } from "./google-strategy";
@@ -16,11 +19,34 @@ require('dotenv').config();
 mongoose.set('strictQuery', false);
 mongoose.connect(process.env.MONGO_DB_TEST);
 
+const cabin = new Cabin({
+  axe: {
+    logger: new Signale()
+  }
+});
+
 // create express server
 const server = express();
+// adds request received hrtime and date symbols to request object
+// (which is used by Cabin internally to add `request.timestamp` to logs
+server.use(requestReceived);
+
+// adds `X-Response-Time` header to responses
+server.use(responseTime());
+
+// adds or re-uses `X-Request-Id` header
+//server.use(requestId());
+
 server.use(express.json());
-server.use(bodyParser.json()) // for parsing application/json
+
+// support parsing of application/json data
+server.use(bodyParser.json());
+
+// support parsing of url encoded data
 server.use(bodyParser.urlencoded({ extended: true }))
+
+// use the cabin middleware (adds request-based logging and helpers)
+server.use(cabin.middleware);
 
 // CORS settings
 server.use(

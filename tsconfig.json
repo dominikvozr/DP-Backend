@@ -1,6 +1,8 @@
 {
    "compileOnSave": false,
    "compilerOptions": {
+     "module": "esnext",
+     "target": "es2022",
      "jsx": "preserve",
      "allowJs": true,
      "alwaysStrict": true,
@@ -15,7 +17,8 @@
      "baseUrl": ".",
      "experimentalDecorators": true,
      "typeRoots": ["./node_modules/@types"],
-     "lib": ["es2015", "es2016"]
+     "types": ["node"],
+     "lib": ["es2022"]
    },
    "exclude": ["production-server", "node_modules"]
  }

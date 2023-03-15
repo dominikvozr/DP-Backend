@@ -11,6 +11,15 @@ router.get('/check-authorization', async (req, res, next) => {
   }
 });
 
+router.get('/logout', async (req, res, next) => {
+  req.logout((err) => {
+      if (err) {
+        next(err);
+      }
+      res.json({message:'success'});
+    });
+});
+
 router.get('/get-user', async (req, res, next) => {
   try {
     res.json({ user: req.user || null });

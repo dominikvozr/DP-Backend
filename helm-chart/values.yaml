@@ -87,11 +87,11 @@ tolerations: []
 affinity: {}
 
 livenessProbe:
-  enabled: true
+  enabled: false
   tcpSocket:
     port: http
   httpGet:
-    path: /health
+    path: /test
     port: 8000 # Change this to the correct port number
   initialDelaySeconds: 200
   timeoutSeconds: 1

@@ -1,5 +1,6 @@
 // import * as _ from 'lodash';
 import * as mongoose from 'mongoose';
+import Scheduler from './../scheduler/scheduler';
 import { generateSlug } from '../utils/slugify';
 
 const examSchema = new mongoose.Schema({
@@ -8,12 +9,14 @@ const examSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  userId: {
-    type: String,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
-  pipelineId: {
-    type: String,
+  pipeline: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Pipeline",
     required: true,
   },
   templateId: {
@@ -71,8 +74,8 @@ const examSchema = new mongoose.Schema({
 
 interface ExamDocument extends mongoose.Document {
   name: string,
-  userId: string,
-  pipelineId: string,
+  user: mongoose.Schema.Types.ObjectId,
+  pipeline: mongoose.Schema.Types.ObjectId,
   templateId: string,
   subject: string,
   description: string,
@@ -96,7 +99,13 @@ interface ExamModel extends mongoose.Model<ExamDocument> {
 
   getExamsByUser({ userId }: { userId: string }): Promise<ExamDocument[]>;
 
-  getExams(): Promise<ExamDocument[]>;
+  getExams(user: any, page: number): Promise<ExamDocument[]>;
+
+  getExam(id : string, user: any): Promise<ExamDocument>;
+
+  getExamBySlug(slug : string, user: any): Promise<ExamDocument>;
+
+  deleteExam(id:string , user: any);
 
   updateExam({
     name,
@@ -170,29 +179,69 @@ class ExamClass extends mongoose.Model {
     return this.findOne({ slug }, 'email displayName avatarUrl').setOptions({ lean: true });
   }
 
-  public static async getExams() {
-    const exams = await this.find()
-    return exams
+  public static async getExams(user: any, page: number | null) {
+    const limit = 8
+    const skip = page ? (page-1) * limit : 0
+    const examsCount = await this.count()
+    const exams = await this.find({'user': user._id})
+      .sort({createdAt: 'desc'})
+      .skip(skip)
+      .limit(limit)
+    return { exams, examsCount }
+  }
+
+  public static async getExam(id : string, user: any) {
+    const exam = await this
+      .findById(id)
+      .populate('user')
+      .exec();
+
+    console.log(exam);
+
+    if(exam.userId.id == user.id)
+      return exam
+    else
+      return 'forbidden'
+  }
+
+  public static async getExamBySlug(slug : string, user: any) {
+    const exam = await this.findOne({slug: slug, 'user': user._id}).populate('user');
+    return exam
+  }
+
+  public static async deleteExam(id:string , user: any) {
+    const exam = await this.findById(id).exec();
+    if(exam.userId == user.id)
+      return await this.deleteOne({id: id})
+    else
+      return 'forbidden'
   }
 
   public static async createExam(data, user) {
-    console.log('Static method: createExam');
-    console.log(data, user);
-
     const slug = await generateSlug(this, data.name);
 
-    data['userId'] = user._id
+    data['user'] = user._id
     data['slug'] = slug
     data['createdAt'] = new Date()
-    data['isOpen'] = true
+    data['isOpen'] = false
 
     data.startDate.replace(' ', 'T')
     data.startDate = new Date(data.startDate)
     data.endDate.replace(' ', 'T')
     data.endDate = new Date(data.endDate)
 
-    const exam = await this.insertMany([data])
-    return exam[0]
+    //const exam = await this.insertMany([data])
+
+    const exam = new Exam(data);
+    exam.save((err, savedExam) => {
+      if (err) throw err;
+      // schedule the job to close the exam
+      Scheduler.getInstance().scheduleExamSimple(savedExam.startDate, savedExam.endDate, {
+        examId: savedExam._id,
+      });
+    });
+
+    return exam // exam[0]
   }
 
   public static async updateProfile({ userId, name, avatarUrl }) {

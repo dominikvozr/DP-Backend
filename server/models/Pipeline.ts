@@ -8,8 +8,10 @@ const pipelineSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  userId: {
-    type: String,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
   },
   description: {
     type: String,

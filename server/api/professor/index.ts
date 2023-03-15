@@ -18,6 +18,10 @@ interface MulterRequest extends express.Request {
     file: any;
 }
 
+interface IndexRequest extends express.Request {
+    page: string;
+}
+
 // Multer storage initialization
 const storage = multer.diskStorage({
   destination: 'upload/test/',
@@ -31,12 +35,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage}) // for parsing multipart/form-data
 const router = express.Router();
 
-
-
-
-
-
-
 router.post('/create', async (req: express.Request, res, next) => {
   try {
     const exam = await Exam.createExam(req.body, req.user);
@@ -46,10 +44,39 @@ router.post('/create', async (req: express.Request, res, next) => {
   }
 });
 
-router.get('/index', async (req, res, next) => {
+router.get('/index', async (req: IndexRequest, res, next) => {
   try {
-    const exams = await Exam.getExams();
-    res.json({user: req.user, exams, isAuthorized: true});
+    const page = parseInt(req.query.page.toString())
+    const data = await Exam.getExams(req.user, page);
+    res.json({isAuthorized: req.user ? true : false, user: req.user || null, data});
+  } catch (err) {
+    next(err);
+  }
+})
+
+router.get('/show/:id', async (req, res, next) => {
+  try {
+    const exam = await Exam.getExam(req.params.id, req.user);
+    res.json({isAuthorized: req.user ? true : false, user: req.user || null, exam});
+  } catch (err) {
+    next(err);
+  }
+})
+
+router.get('/get', async (req, res, next) => {
+  try {
+    const exam = await Exam.getExamBySlug(req.query.test as string, req.user);
+    res.json({isAuthorized: req.user ? true : false, user: req.user || null, exam});
+  } catch (err) {
+    next(err);
+  }
+})
+
+router.get('/delete/:id', async (req, res, next) => {
+  try {
+    const result = await Exam.deleteExam(req.params.id, req.user);
+    console.log(result);
+    res.json({result: 'success'});
   } catch (err) {
     next(err);
   }
