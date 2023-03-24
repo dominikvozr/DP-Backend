@@ -116,29 +116,6 @@ interface TestModel extends mongoose.Model<TestDocument> {
 class TestClass extends mongoose.Model {
   public static async getTests(user: any) {
     const exams = await this.find({'user': user._id}).populate('user')
-    /* async.waterfall(
-    [
-        function(callback) {
-          Test.find({userId: user.id}, callback);
-        },
-        function(tests,callback) {
-            Exam.find({
-              "test": { "$in": tests.map(function(el) {
-                  return el._id
-              })
-          }, callback});
-        }
-    ],
-    function(err, results) {
-       if (err) {
-          // do something
-       } else {
-        console.log(results);
-
-          // results are the matching entries
-       }
-    }) */
-
     return exams
   }
 
@@ -147,7 +124,7 @@ class TestClass extends mongoose.Model {
     if(test.userId == user.id)
       return test
     else
-      return 'forbidden'
+      return {status: 'forbidden', isAuthenticated: false}
   }
 
   public static async getTestByExamSlug(slug: string, user: any) {

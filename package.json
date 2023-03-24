@@ -4,7 +4,8 @@
     "license": "MIT",
     "scripts": {
         "dev": "nodemon --esm server/server.ts",
-        "lint": "eslint . --ext .ts,.tsx"
+        "lint": "eslint . --ext .ts,.tsx",
+        "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
         "@ladjs/graceful": "^3.2.2",

@@ -196,12 +196,10 @@ class ExamClass extends mongoose.Model {
       .populate('user')
       .exec();
 
-    console.log(exam);
-
     if(exam.userId.id == user.id)
       return exam
     else
-      return 'forbidden'
+      return {status: 'forbidden', isAuthenticated: false}
   }
 
   public static async getExamBySlug(slug : string, user: any) {
@@ -214,7 +212,7 @@ class ExamClass extends mongoose.Model {
     if(exam.userId == user.id)
       return await this.deleteOne({id: id})
     else
-      return 'forbidden'
+      return {status: 'forbidden', isAuthenticated: false}
   }
 
   public static async createExam(data, user) {

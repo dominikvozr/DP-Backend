@@ -13,7 +13,7 @@ const bodyParser = require('body-parser')
 
 import { setupGoogleOAuth } from "./google-strategy";
 import api from './api';
-
+// helm upgrade studentcode-be-helm-chart helm-chart -f values.yaml
 // eslint-disable-next-line
 require('dotenv').config();
 mongoose.set('strictQuery', false);
