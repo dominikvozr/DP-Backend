@@ -5,7 +5,10 @@ pipeline {
             apiVersion: v1
             kind: Pod
             metadata:
-              name: andreas-test
+              labels:
+                app: myapp
+              annotations:
+                sidecar.istio.io/inject: "false"
             spec:
               containers:
               - name: jnlp
