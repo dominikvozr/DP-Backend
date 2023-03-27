@@ -33,7 +33,6 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         container('docker') {
-          sh 'dockerd'
           sh 'docker build -t studentcode-be .'
         }
       }
