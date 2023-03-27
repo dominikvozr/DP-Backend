@@ -10,6 +10,18 @@ pipeline {
               containers:
               - name: jnlp
                 image: jenkins/inbound-agent
+              - name: docker
+                image: docker:latest
+                command:
+                - cat
+                tty: true
+                volumeMounts:
+                - mountPath: /var/run/docker.sock
+                  name: docker-sock
+              volumes:
+                - name: docker-sock
+                  hostPath:
+                    path: /var/run/docker.sock
             '''
         }
     }
