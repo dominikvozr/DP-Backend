@@ -20,10 +20,7 @@ spec:
       tty: true
       env:
         - name: DOCKER_HOST
-          value: tcp://$(DIND_IP):2375
-      envFrom:
-        - configMapRef:
-            name: dind-ip
+          value: tcp://docker:2375
     - name: dind
       image: docker:dind
       securityContext:
