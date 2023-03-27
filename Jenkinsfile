@@ -29,7 +29,7 @@ spec:
         - name: DOCKER_TLS_VERIFY
           value: 0
         - name: DOCKER_HOST
-          value: tcp://localhost:2376
+          value: tcp://localhost:2375
     - name: dind
       image: docker:dind
       securityContext:
