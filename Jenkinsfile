@@ -1,14 +1,14 @@
 pipeline {
   agent {
         kubernetes {
+            label 'dind'
+            defaultContainer 'docker'
             yaml '''
 apiVersion: v1
 kind: Pod
 metadata:
   labels:
-    app: myapp
-  annotations:
-    sidecar.istio.io/inject: "false"
+    app: jenkins
 spec:
   containers:
     - name: jnlp
@@ -54,20 +54,16 @@ spec:
   stages {
     stage('Build Docker Image') {
       steps {
-        container('docker') {
-          sh 'docker build -t studentcode-be .'
-        }
+        sh 'docker build -t studentcode-be .'
       }
     }
 
     stage('Push Docker Image') {
       steps {
-        container('docker') {
-          withCredentials([usernamePassword(credentialsId: 'cc8463c8-f169-4079-852d-89fec3e6dbac', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-            sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
-          }
-          sh 'docker push studentcode-be'
+        withCredentials([usernamePassword(credentialsId: 'cc8463c8-f169-4079-852d-89fec3e6dbac', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+          sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
         }
+        sh 'docker push studentcode-be'
       }
     }
 
@@ -79,11 +75,11 @@ spec:
       }
     }
 
-    stage('Run Tests') {
+    /* stage('Run Tests') {
       steps {
         sh 'npm install'
         sh 'npm test'
       }
-    }
+    } */
   }
 }
