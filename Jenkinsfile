@@ -13,26 +13,6 @@ pipeline {
               containers:
               - name: jnlp
                 image: jenkins/inbound-agent
-              - name: dind
-                image: docker:19.03.6-dind
-                env:
-                  - name: DOCKER_TLS_CERTDIR
-                    value: /certs
-                volumeMounts:
-                  - name: docker-client-certs
-                    mountPath: /certs/client
-                  - name: docker-config
-                    mountPath: /etc/docker/daemon.json
-                    subPath: daemon.json
-                securityContext:
-                  privileged: true
-                resources:
-                  requests:
-                    memory: 1Gi
-                    cpu: "1"
-                  limits:
-                    memory: 2Gi
-                imagePullPolicy: Always
               - name: docker
                 image: docker:latest
                 command:
@@ -46,9 +26,6 @@ pipeline {
                 - name: docker-sock
                   hostPath:
                     path: /var/run/docker.sock
-                - name: docker-client-certs
-                  emptyDir:
-                    medium: Memory
             '''
         }
     }
@@ -57,6 +34,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         container('docker') {
+          sh 'systemctl start docker'
           sh 'docker build -t studentcode-be .'
         }
       }
