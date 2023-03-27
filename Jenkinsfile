@@ -42,11 +42,11 @@ pipeline {
                     mountPath: /var/lib/docker
                   - name: dind-certs
                     mountPath: /certs
-            volumes:
-              - name: dind-storage
-                emptyDir: {}
-              - name: dind-certs
-                emptyDir: {}
+          volumes:
+            - name: dind-storage
+              emptyDir: {}
+            - name: dind-certs
+              emptyDir: {}
             '''
         }
     }
