@@ -1,5 +1,6 @@
 pipeline {
   agent {
+        docker { image 'docker' }
         kubernetes {
             yaml '''
             apiVersion: v1
@@ -28,7 +29,7 @@ pipeline {
             '''
         }
     }
-    
+
   stages {
     stage('Build Docker Image') {
       steps {
