@@ -1,6 +1,5 @@
 pipeline {
   agent {
-        docker { image 'docker' }
         kubernetes {
             yaml '''
             apiVersion: v1
