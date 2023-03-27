@@ -1,26 +1,19 @@
 pipeline {
   agent {
-    kubernetes {
-      yaml '''
-        apiVersion: v1
-        kind: Pod
-        spec:
-          containers:
-          - name: docker
-            image: docker:latest
-            command:
-            - cat
-            tty: true
-            volumeMounts:
-             - mountPath: /var/run/docker.sock
-               name: docker-sock
-          volumes:
-          - name: docker-sock
-            hostPath:
-              path: /var/run/docker.sock
-        '''
+        kubernetes {
+            yaml '''
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              name: andreas-test
+            spec:
+              containers:
+              - name: jnlp
+                image: jenkins/inbound-agent:4.3-4-jdk11
+                command: ["sleep", "10000"]
+            '''
+        }
     }
-  }
   stages {
     stage('Build Docker Image') {
       steps {
