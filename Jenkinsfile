@@ -18,31 +18,18 @@ spec:
       command:
         - /bin/cat
       tty: true
-      volumeMounts:
-        - name: dind-certs
-          mountPath: /certs
       env:
-
-        - name: DOCKER_CERT_PATH
-          value: /certs
-        - name: DOCKER_TLS_VERIFY
-          value: 0
         - name: DOCKER_HOST
-          value: tcp://localhost:2375
+          value: tcp://dind:2375
     - name: dind
       image: docker:dind
       securityContext:
         privileged: true
-      
-      volumeMounts:
-        - name: dind-storage
-          mountPath: /var/lib/docker
-        - name: dind-certs
-          mountPath: /certs
+      env:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
   volumes:
     - name: dind-storage
-      emptyDir: {}
-    - name: dind-certs
       emptyDir: {}
             '''
         }
