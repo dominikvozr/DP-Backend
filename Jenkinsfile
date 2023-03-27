@@ -10,7 +10,6 @@ pipeline {
               containers:
               - name: jnlp
                 image: jenkins/inbound-agent:4.3-4-jdk11
-                command: ["sleep", "10000"]
             '''
         }
     }
