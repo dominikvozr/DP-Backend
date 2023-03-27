@@ -22,8 +22,7 @@ spec:
         - name: dind-certs
           mountPath: /certs
       env:
-        - name: DOCKER_TLS_CERTDIR
-          value: /certs
+
         - name: DOCKER_CERT_PATH
           value: /certs
         - name: DOCKER_TLS_VERIFY
@@ -34,14 +33,12 @@ spec:
       image: docker:dind
       securityContext:
         privileged: true
-      env:
-        - name: DOCKER_TLS_CERTDIR
-          value: /certs
+      
       volumeMounts:
         - name: dind-storage
           mountPath: /var/lib/docker
         - name: dind-certs
-          mountPath: /certs/client
+          mountPath: /certs
   volumes:
     - name: dind-storage
       emptyDir: {}
