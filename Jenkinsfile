@@ -17,15 +17,14 @@ pipeline {
                 image: docker:latest
                 command:
                 - cat
-                privileged: true
                 tty: true
                 volumeMounts:
                 - mountPath: /var/run/docker.sock
                   name: docker-sock
               volumes:
-                - name: docker-sock
-                  hostPath:
-                    path: /var/run/docker.sock
+              - name: docker-sock
+                hostPath:
+                  path: /var/run/docker.sock
             '''
         }
     }
