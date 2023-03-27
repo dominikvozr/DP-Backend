@@ -27,7 +27,7 @@ spec:
         - name: DOCKER_CERT_PATH
           value: /certs
         - name: DOCKER_TLS_VERIFY
-          value: 1
+          value: 0
         - name: DOCKER_HOST
           value: tcp://localhost:2376
     - name: dind
