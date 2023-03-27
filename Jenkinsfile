@@ -20,7 +20,9 @@ spec:
       tty: true
       env:
         - name: DOCKER_HOST
-          value: tcp://docker:2375
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
     - name: dind
       image: docker:dind
       securityContext:
@@ -28,6 +30,8 @@ spec:
       env:
         - name: DOCKER_TLS_CERTDIR
           value: ""
+        - name: DOCKER_HOST
+          value: tcp://localhost:2375
   volumes:
     - name: dind-storage
       emptyDir: {}
