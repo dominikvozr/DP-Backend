@@ -20,9 +20,7 @@ spec:
       tty: true
       env:
         - name: DOCKER_HOST
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
+          value: tcp://localhost:2375
     - name: dind
       image: docker:dind
       securityContext:
@@ -30,8 +28,6 @@ spec:
       env:
         - name: DOCKER_TLS_CERTDIR
           value: ""
-        - name: DOCKER_HOST
-          value: tcp://localhost:2375
   volumes:
     - name: dind-storage
       emptyDir: {}
@@ -49,7 +45,7 @@ spec:
     stage('Push Docker Image') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'cc8463c8-f169-4079-852d-89fec3e6dbac', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-          sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+          sh 'docker login https://hub.docker.com -u $DOCKER_USERNAME -p $DOCKER_PASSWORD --password-stdin'
         }
         sh 'docker push studentcode-be'
       }
