@@ -52,7 +52,7 @@ ingress:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: bawix.xyz:81
+    - host: http://bawix.xyz:81
       paths:
         - path: /server
           pathType: Prefix
