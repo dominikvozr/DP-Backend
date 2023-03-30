@@ -47,7 +47,10 @@ spec:
         periodSeconds: 10
         timeoutSeconds: 1
     - name: helm
-      image: lachlanevenson/k8s-helm:latest
+      image: alpine/helm:latest
+      command:
+        - /bin/cat
+      tty: true
   volumes:
     - name: dind-storage
       emptyDir: {}
