@@ -11,10 +11,21 @@ metadata:
     app: jenkins
 spec:
   containers:
+    - name: jnlp
+      image: jenkins/inbound-agent
     - name: docker
       image: docker:latest
       command:
         - /bin/cat
+      readinessProbe:
+        exec:
+          command:
+            - sh
+            - "-c"
+            - "docker ps >/dev/null 2>&1"
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        timeoutSeconds: 1
       tty: true
       env:
         - name: DOCKER_HOST
@@ -26,8 +37,15 @@ spec:
       env:
         - name: DOCKER_TLS_CERTDIR
           value: ""
-    - name: jnlp
-      image: jenkins/inbound-agent
+      readinessProbe:
+        exec:
+          command:
+            - sh
+            - "-c"
+            - "docker ps >/dev/null 2>&1"
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        timeoutSeconds: 1
   volumes:
     - name: dind-storage
       emptyDir: {}
