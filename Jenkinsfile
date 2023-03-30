@@ -46,9 +46,21 @@ spec:
         initialDelaySeconds: 5
         periodSeconds: 10
         timeoutSeconds: 1
+    - name: helm
+      image: lachlanevenson/k8s-helm:latest
+      env:
+        - name: KUBECONFIG
+          value: /mnt/kubeconfig/config
+      volumeMounts:
+        - name: kubeconfig
+          mountPath: /mnt/kubeconfig
+          readOnly: true
   volumes:
     - name: dind-storage
       emptyDir: {}
+    - name: kubeconfig
+      secret:
+        secretName: kubeconfig-secret
             '''
         }
     }
