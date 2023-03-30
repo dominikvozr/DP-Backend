@@ -11,8 +11,6 @@ metadata:
     app: jenkins
 spec:
   containers:
-    - name: jnlp
-      image: jenkins/inbound-agent
     - name: docker
       image: docker:latest
       command:
@@ -28,6 +26,8 @@ spec:
       env:
         - name: DOCKER_TLS_CERTDIR
           value: ""
+    - name: jnlp
+      image: jenkins/inbound-agent
   volumes:
     - name: dind-storage
       emptyDir: {}
