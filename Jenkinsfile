@@ -65,7 +65,7 @@ spec:
         withCredentials([usernamePassword(credentialsId: 'cc8463c8-f169-4079-852d-89fec3e6dbac', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
           sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
         }
-        sh 'docker push studentcode-be'
+        sh 'docker push studentcode/studentcode-be'
       }
     }
 
