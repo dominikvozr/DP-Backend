@@ -56,7 +56,7 @@ spec:
   stages {
     stage('Build Docker Image') {
       steps {
-        sh 'docker build -t studentcode-be .'
+        sh 'docker build -t studentcode/studentcode-be .'
       }
     }
 
