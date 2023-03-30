@@ -38,10 +38,12 @@ spec:
               containerPort: 8000
               protocol: TCP
           livenessProbe:
+            enabled: false
             httpGet:
               path: /
               port: http
           readinessProbe:
+            enabled: false
             httpGet:
               path: /
               port: http
