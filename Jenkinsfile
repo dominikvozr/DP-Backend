@@ -69,13 +69,21 @@ spec:
       }
     }
 
-    stage('Upgrade Application using Helm Chart') {
+    stage("Upgrade Application using Helm Chart") {
+      steps {
+        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+          sh "curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash"
+          sh "helm upgrade studentcode-be-helm-chart helm-chart -f values.yaml --kubeconfig $KUBECONFIG"
+        }
+      }
+    }
+    /* stage('Upgrade Application using Helm Chart') {
       steps {
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
           sh 'helm upgrade studentcode-be-helm-chart helm-chart -f values.yaml --kubeconfig $KUBECONFIG'
         }
       }
-    }
+    } */
 
     /* stage('Run Tests') {
       steps {
