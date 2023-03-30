@@ -78,7 +78,7 @@ spec:
       steps {
         container('helm') {
           withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-            sh "helm upgrade studentcode-be-helm-chart helm-chart -f values.yaml --kubeconfig $KUBECONFIG"
+            sh "helm upgrade studentcode-be-helm-chart helm-chart -f ./helm-chart/values.yaml --kubeconfig $KUBECONFIG"
           }
         }
       }
