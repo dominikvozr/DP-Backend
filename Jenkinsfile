@@ -84,7 +84,7 @@ spec:
 
     stage('Update Helm Chart Values') {
       steps {
-        sh "sed -i 's|repository: studentcode/studentcode-be.*$|repository: ${env.IMAGE_TAG}|' ./helm-chart/values.yaml"
+        sh "sed -i \"s|repository: studentcode/studentcode-be.*\\$|repository: ${env.IMAGE_TAG}|\" ./helm-chart/values.yaml"
       }
     }
 
