@@ -66,16 +66,16 @@ spec:
 
     stage('Build Docker Image') {
       steps {
-        sh 'docker build -t ${env.IMAGE_TAG} .'
+        sh "docker build -t ${env.IMAGE_TAG} ."
       }
     }
 
     stage('Push Docker Image') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'cc8463c8-f169-4079-852d-89fec3e6dbac', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-          sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+          sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
         }
-        sh 'docker push ${env.IMAGE_TAG}'
+        sh "docker push ${env.IMAGE_TAG}"
       }
     }
 
