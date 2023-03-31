@@ -5,6 +5,7 @@ import professorExamApi from './professor';
 import StudentTestApi from './student';
 import professorPipelineApi from './pipeline';
 import userExpressRoutes from './user';
+import coderUserExpressRoutes from './coder-api/users'
 
 function handleError(err, _, res, __) {
   console.error(err.stack);
@@ -23,4 +24,5 @@ export default function api(server: express.Express) {
   server.use('/api/v1/professor/exam', isAuthenticated, professorExamApi, handleError);
   server.use('/api/v1/student/test', isAuthenticated, StudentTestApi, handleError);
   server.use('/api/v1/pipeline', isAuthenticated, professorPipelineApi, handleError);
+  server.use('/api/v1/coder', isAuthenticated, coderUserExpressRoutes,handleError);
 }
