@@ -57,12 +57,15 @@ spec:
             '''
         }
     }
-  environment {
-    GIT_COMMIT_SHORT = sh(script: 'echo $(git rev-parse --short HEAD)', returnStdout: true).trim()
-    IMAGE_TAG = "studentcode/studentcode-be:${GIT_COMMIT_SHORT}"
-  }
 
   stages {
+    stage('Generate Image Tag') {
+      steps {
+        script {
+          env.IMAGE_TAG = "studentcode/studentcode-be:${env.BUILD_NUMBER}"
+        }
+      }
+    }
 
     stage('Build Docker Image') {
       steps {
