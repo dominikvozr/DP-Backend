@@ -62,14 +62,14 @@ spec:
     stage('Generate Image Tag') {
       steps {
         script {
-          env.IMAGE_TAG = "studentcode/studentcode-be:${env.BUILD_NUMBER}"
+          env.IMAGE_TAG = "${env.BUILD_NUMBER}"
         }
       }
     }
 
     stage('Build Docker Image') {
       steps {
-        sh "docker build -t ${env.IMAGE_TAG} ."
+        sh "docker build -t studentcode/studentcode-be:${env.IMAGE_TAG} ."
       }
     }
 
@@ -78,13 +78,13 @@ spec:
         withCredentials([usernamePassword(credentialsId: 'cc8463c8-f169-4079-852d-89fec3e6dbac', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
           sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
         }
-        sh "docker push ${env.IMAGE_TAG}"
+        sh "docker push studentcode/studentcode-be:${env.IMAGE_TAG}"
       }
     }
 
     stage('Update Helm Chart Values') {
       steps {
-        sh "sed -i \"s|repository: studentcode/studentcode-be.*|repository: ${env.IMAGE_TAG}|\" ./helm-chart/values.yaml"
+        sh "sed -i \"s|repository: studentcode/studentcode-be.*|repository: studentcode/studentcode-be:${env.IMAGE_TAG}|\" ./helm-chart/values.yaml"
       }
     }
 
