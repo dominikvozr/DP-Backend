@@ -78,7 +78,7 @@ spec:
       steps {
         container('helm') {
           withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-            sh "helm delete studentcode-be-helm-chart --purge --kubeconfig $KUBECONFIG"
+            sh "helm delete studentcode-be-helm-chart --kubeconfig $KUBECONFIG"
             sh "helm install studentcode-be-helm-chart ./helm-chart -f ./helm-chart/values.yaml --kubeconfig $KUBECONFIG"
           }
         }
