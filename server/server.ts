@@ -23,7 +23,7 @@ const database = process.env.MONGO_DATABASE;
 /* const mongoService = process.env.MONGO_SERVICE;
 const mongoPort = process.env.MONGO_PORT; */
 
-const uri = `mongodb://${username}:${password}@mongodb.default.svc.cluster.local:27017/${database}`;
+const uri = `mongodb://${username}:${password}@mongodb.default.svc.cluster.local:27017/${database}?retryWrites=true&w=majority`;
 
 mongoose.set('strictQuery', false);
 mongoose.connect(uri);
