@@ -6,6 +6,8 @@ import StudentTestApi from './student';
 import professorPipelineApi from './pipeline';
 import userExpressRoutes from './user';
 
+const apiRouter = express.Router();
+
 function handleError(err, _, res, __) {
   console.error(err.stack);
 
@@ -17,10 +19,17 @@ const isAuthenticated = (req, res, next) => {
   else next()
 }
 
-export default function api(server: express.Express) {
-  server.use('/api/v1/public', publicExpressRoutes, handleError);
-  server.use('/api/v1/user', isAuthenticated, userExpressRoutes, handleError);
-  server.use('/api/v1/professor/exam', isAuthenticated, professorExamApi, handleError);
-  server.use('/api/v1/student/test', isAuthenticated, StudentTestApi, handleError);
-  server.use('/api/v1/pipeline', isAuthenticated, professorPipelineApi, handleError);
-}
+apiRouter.use('/api/v1/public', publicExpressRoutes, handleError);
+apiRouter.use('/api/v1/user', isAuthenticated, userExpressRoutes, handleError);
+apiRouter.use('/api/v1/professor/exam', isAuthenticated, professorExamApi, handleError);
+apiRouter.use('/api/v1/student/test', isAuthenticated, StudentTestApi, handleError);
+apiRouter.use('/api/v1/pipeline', isAuthenticated, professorPipelineApi, handleError);
+
+/* export default function api(server: express.Express) {
+  server.use(`${process.env.BASE_PATH}/api/v1/public`, publicExpressRoutes, handleError);
+  server.use(`${process.env.BASE_PATH}/api/v1/user`, isAuthenticated, userExpressRoutes, handleError);
+  server.use(`${process.env.BASE_PATH}/api/v1/professor/exam`, isAuthenticated, professorExamApi, handleError);
+  server.use(`${process.env.BASE_PATH}/api/v1/student/test`, isAuthenticated, StudentTestApi, handleError);
+  server.use(`${process.env.BASE_PATH}/api/v1/pipeline`, isAuthenticated, professorPipelineApi, handleError);
+} */
+export default apiRouter
