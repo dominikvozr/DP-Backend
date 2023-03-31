@@ -26,7 +26,7 @@ const mongoPort = process.env.MONGO_PORT;
 const uri = `mongodb://${username}:${password}@${mongoService}:${mongoPort}/${database}`;
 
 mongoose.set('strictQuery', false);
-mongoose.connect(uri); // process.env.MONGO_DB_TEST
+mongoose.connect(uri);
 
 const cabin = new Cabin({
   axe: {
@@ -107,7 +107,8 @@ else
 
 // Every unsatisfactory request returns 403 status code
 server.get('*', (_, res) => {
-  res.sendStatus(403);
+  console.log(process.env.BASE_PATH)
+  res.json('Nothing here!');
 });
 
 
