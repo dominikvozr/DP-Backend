@@ -57,7 +57,9 @@ const setupGoogleOAuth = ({ server }) => {
   server.use(passport.initialize());
   server.use(passport.session());
 
-  server.get(`${process.env.BASE_PATH}/auth/google`, (req, res, next) => {
+  //const prefix = process.env.BASE_PATH
+
+  server.get('/auth/google', (req, res, next) => {
     const options = {
       scope: ['profile', 'email'],
       prompt: 'select_account',
@@ -66,7 +68,7 @@ const setupGoogleOAuth = ({ server }) => {
     passport.authenticate('google', options)(req, res, next);
   });
 
-  server.get(`${process.env.BASE_PATH}/auth/google/callback`,
+  server.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/login' }),
     (_, res) => {
 

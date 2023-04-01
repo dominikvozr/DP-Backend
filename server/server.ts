@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import * as cors from 'cors';
 import * as express from 'express';
 import * as session from 'express-session';
 import * as mongoose from 'mongoose';
 //const requestId = require('express-request-id');
+const cors = require('cors');
 const requestReceived = require('request-received');
 const responseTime = require('response-time');
 const Cabin = require('cabin');
@@ -27,6 +27,8 @@ const uri = `mongodb://${username}:${password}@${mongoService}:${mongoPort}/${da
 
 mongoose.set('strictQuery', false);
 mongoose.connect(uri);
+// for development purpose only
+// mongoose.connect(process.env.ALLOWED_URI);
 
 const cabin = new Cabin({
   axe: {
@@ -60,7 +62,7 @@ server.use(cabin.middleware);
 // CORS settings
 server.use(
   cors({
-    origin: [process.env.URL_APP, process.env.URL_API, process.env.GOOGLE_OAUTH_URL],
+    origin: [process.env.URL_APP, process.env.URL_API, process.env.GOOGLE_OAUTH_URL, process.env.ALLOWED_URI],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   }),
