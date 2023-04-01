@@ -28,7 +28,7 @@ const uri = `mongodb://${username}:${password}@${mongoService}:${mongoPort}/${da
 mongoose.set('strictQuery', false);
 mongoose.connect(uri);
 // for development purpose only
-// mongoose.connect(process.env.ALLOWED_URI);
+// mongoose.connect(process.env.MONGO_DB_TEST);
 
 const cabin = new Cabin({
   axe: {

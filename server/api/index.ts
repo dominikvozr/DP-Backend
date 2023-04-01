@@ -15,7 +15,8 @@ function handleError(err, _, res, __) {
 }
 
 const isAuthenticated = (req, res, next) => {
-  if (req.user === null) res.sendStatus(401)
+  if (req.user === null || req.user === undefined)
+    res.json({isAuthorized: false, user: {}})
   else next()
 }
 
