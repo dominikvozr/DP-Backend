@@ -36,7 +36,6 @@ const setupGoogleOAuth = ({ server }) => {
       console.error(err);
     }
   };
-  console.log(process.env.URL_API + '/server/auth/google/callback');
 
   passport.use(new OAuth2Strategy({
           clientID: process.env.GOOGLE_CLIENT_ID,
@@ -74,7 +73,7 @@ const setupGoogleOAuth = ({ server }) => {
     (_, res) => {
 
     // Successful authentication, redirect home.
-    res.redirect(`${process.env.URL_APP}`);
+    res.redirect(`${process.env.URL_APP}/`);
   });
 }
 
