@@ -36,6 +36,7 @@ const setupGoogleOAuth = ({ server }) => {
       console.error(err);
     }
   };
+  console.log(process.env.URL_API + '/server/auth/google/callback');
 
   passport.use(new OAuth2Strategy({
           clientID: process.env.GOOGLE_CLIENT_ID,
