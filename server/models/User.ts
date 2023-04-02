@@ -34,6 +34,7 @@ const UserSchema = new mongoose.Schema({
   displayName: String,
   avatarUrl: String,
   darkTheme: Boolean,
+  gitea: Object,
 });
 
 export interface UserDocument extends mongoose.Document {
@@ -46,6 +47,7 @@ export interface UserDocument extends mongoose.Document {
   googleId: string;
   googleToken: { accessToken: string; refreshToken: string };
   isSignedupViaGoogle: boolean;
+  gitea: object,
 }
 
 interface UserModel extends mongoose.Model<UserDocument> {
@@ -69,12 +71,14 @@ interface UserModel extends mongoose.Model<UserDocument> {
     displayName,
     avatarUrl,
     googleToken,
+    gitea
   }: {
     googleId: string;
     email: string;
     displayName: string;
     avatarUrl: string;
     googleToken: { accessToken?: string; refreshToken?: string };
+    gitea: object;
   }): Promise<UserDocument>;
 
   toggleTheme({
@@ -100,11 +104,9 @@ class UserClass extends mongoose.Model {
 
     const modifier = { displayName: user.displayName, avatarUrl, slug: user.slug };
 
-    console.log(user.slug);
-
     if (name !== user.displayName) {
       modifier.displayName = name;
-      modifier.slug = name; // await generateSlug(this, name);
+      modifier.slug = await generateSlug(this, name);
     }
 
     return this.findByIdAndUpdate(userId, { $set: modifier }, { new: true, runValidators: true })
@@ -113,7 +115,7 @@ class UserClass extends mongoose.Model {
   }
 
   public static publicFields(): string[] {
-    return ['_id', 'id', 'displayName', 'email', 'avatarUrl', 'slug', 'isSignedupViaGoogle'];
+    return ['_id', 'id', 'displayName', 'email', 'avatarUrl', 'slug', 'isSignedupViaGoogle', 'gitea'];
   }
 
   public static async signInOrSignUpViaGoogle({
@@ -122,6 +124,7 @@ class UserClass extends mongoose.Model {
     displayName,
     avatarUrl,
     googleToken,
+    gitea,
   }) {
     const user = await this.findOne({ email })
       .select([...this.publicFields(), 'googleId'].join(' '))
@@ -158,6 +161,7 @@ class UserClass extends mongoose.Model {
       slug,
       isSignedupViaGoogle: true,
       darkTheme: false,
+      gitea,
     });
 
     return _.pick(newUser, this.publicFields());
