@@ -53,6 +53,61 @@ spec:
                 secretKeyRef:
                   name: mongodb-credentials
                   key: MONGO_DATABASE
+            - name: PORT_API
+              valueFrom:
+                secretKeyRef:
+                  name: be-secrets
+                  key: PORT_API
+            - name: ALLOWED_URI
+              valueFrom:
+                secretKeyRef:
+                  name: be-secrets
+                  key: ALLOWED_URI
+            - name: URL_API
+              valueFrom:
+                secretKeyRef:
+                  name: be-secrets
+                  key: URL_API
+            - name: URL_APP
+              valueFrom:
+                secretKeyRef:
+                  name: be-secrets
+                  key: URL_APP
+            - name: GOOGLE_OAUTH_URL
+              valueFrom:
+                secretKeyRef:
+                  name: be-secrets
+                  key: GOOGLE_OAUTH_URL
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: be-secrets
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: be-secrets
+                  key: GOOGLE_CLIENT_SECRET
+            - name: GITEA_URL
+              valueFrom:
+                secretKeyRef:
+                  name: be-secrets
+                  key: GITEA_URL
+            - name: GITEA_ADMIN_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: be-secrets
+                  key: GITEA_ADMIN_ACCESS_TOKEN
+            - name: SESSION_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: be-secrets
+                  key: SESSION_NAME
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: be-secrets
+                  key: SESSION_SECRET
             - name: MONGO_SERVICE
               value: "mongodb.default.svc.cluster.local"
             - name: BASE_PATH
