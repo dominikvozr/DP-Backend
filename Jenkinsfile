@@ -84,7 +84,7 @@ spec:
 
     stage('Update Helm Chart Values') {
       steps {
-        sh "sed -i \"s|tag: latest|tag: ${env.IMAGE_TAG}|\" ./helm-chart/values.yaml"
+        sh "sed -i \"s|tag: latest|tag: ${env.IMAGE_TAG}|\" ./be-chart/values.yaml"
       }
     }
 
@@ -92,7 +92,7 @@ spec:
       steps {
         container('helm') {
           withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-            sh "helm upgrade studentcode-be-helm-chart ./helm-chart -f ./helm-chart/values.yaml --kubeconfig $KUBECONFIG"
+            sh "helm upgrade studentcode-be-helm-chart ./be-chart -f ./be-chart/values.yaml --kubeconfig $KUBECONFIG"
           }
         }
       }
