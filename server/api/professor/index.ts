@@ -46,6 +46,8 @@ router.post('/create', async (req: express.Request, res, next) => {
 
 router.get('/index', async (req: IndexRequest, res, next) => {
   try {
+    console.log(req.user);
+
     const page = parseInt(req.query.page.toString())
     const data = await Exam.getExams(req.user, page);
     res.json({isAuthorized: req.user ? true : false, user: req.user || null, data});

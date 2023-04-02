@@ -5,7 +5,8 @@ import professorExamApi from './professor';
 import StudentTestApi from './student';
 import professorPipelineApi from './pipeline';
 import userExpressRoutes from './user';
-import coderUserExpressRoutes from './coder-api/users'
+
+const apiRouter = express.Router();
 
 function handleError(err, _, res, __) {
   console.error(err.stack);
@@ -14,15 +15,22 @@ function handleError(err, _, res, __) {
 }
 
 const isAuthenticated = (req, res, next) => {
-  if (req.user === null) res.sendStatus(401)
+  if (req.user === null || req.user === undefined)
+    res.json({isAuthorized: false, user: {}})
   else next()
 }
 
-export default function api(server: express.Express) {
-  server.use('/api/v1/public', publicExpressRoutes, handleError);
-  server.use('/api/v1/user', isAuthenticated, userExpressRoutes, handleError);
-  server.use('/api/v1/professor/exam', isAuthenticated, professorExamApi, handleError);
-  server.use('/api/v1/student/test', isAuthenticated, StudentTestApi, handleError);
-  server.use('/api/v1/pipeline', isAuthenticated, professorPipelineApi, handleError);
-  server.use('/api/v1/coder', isAuthenticated, coderUserExpressRoutes,handleError);
-}
+apiRouter.use('/api/v1/public', publicExpressRoutes, handleError);
+apiRouter.use('/api/v1/user', isAuthenticated, userExpressRoutes, handleError);
+apiRouter.use('/api/v1/professor/exam', isAuthenticated, professorExamApi, handleError);
+apiRouter.use('/api/v1/student/test', isAuthenticated, StudentTestApi, handleError);
+apiRouter.use('/api/v1/pipeline', isAuthenticated, professorPipelineApi, handleError);
+
+/* export default function api(server: express.Express) {
+  server.use(`${process.env.BASE_PATH}/api/v1/public`, publicExpressRoutes, handleError);
+  server.use(`${process.env.BASE_PATH}/api/v1/user`, isAuthenticated, userExpressRoutes, handleError);
+  server.use(`${process.env.BASE_PATH}/api/v1/professor/exam`, isAuthenticated, professorExamApi, handleError);
+  server.use(`${process.env.BASE_PATH}/api/v1/student/test`, isAuthenticated, StudentTestApi, handleError);
+  server.use(`${process.env.BASE_PATH}/api/v1/pipeline`, isAuthenticated, professorPipelineApi, handleError);
+} */
+export default apiRouter

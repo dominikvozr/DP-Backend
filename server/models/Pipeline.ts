@@ -104,11 +104,10 @@ class PipelineClass extends mongoose.Model {
 
   public static async createPipeline(data, user) {
     console.log('Static method: createPipeline');
-    console.log(data, user);
 
     const slug = await generateSlug(this, data.name);
 
-    data['userId'] = user._id
+    data['user'] = user._id
     data['slug'] = slug
     data['createdAt'] = new Date()
 

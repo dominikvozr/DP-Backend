@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import * as cors from 'cors';
 import * as express from 'express';
 import * as session from 'express-session';
 import * as mongoose from 'mongoose';
 //const requestId = require('express-request-id');
+const cors = require('cors');
 const requestReceived = require('request-received');
 const responseTime = require('response-time');
 const Cabin = require('cabin');
@@ -12,12 +12,23 @@ const MongoStore = require('connect-mongo')(session);
 const bodyParser = require('body-parser')
 
 import { setupGoogleOAuth } from "./google-strategy";
-import api from './api';
+import apiRouter from './api';
 // helm upgrade studentcode-be-helm-chart helm-chart -f values.yaml
 // eslint-disable-next-line
 require('dotenv').config();
+
+const username = process.env.MONGO_USERNAME;
+const password = encodeURIComponent(process.env.MONGO_PASSWORD);
+const database = process.env.MONGO_DATABASE;
+const mongoService = process.env.MONGO_SERVICE;
+const mongoPort = process.env.MONGO_PORT;
+
+const uri = `mongodb://${username}:${password}@${mongoService}:${mongoPort}/${database}?retryWrites=true&w=majority`;
+
 mongoose.set('strictQuery', false);
-mongoose.connect(process.env.MONGO_DB_TEST);
+mongoose.connect(uri);
+// for development purpose only
+// mongoose.connect(process.env.MONGO_DB_TEST);
 
 const cabin = new Cabin({
   axe: {
@@ -51,7 +62,7 @@ server.use(cabin.middleware);
 // CORS settings
 server.use(
   cors({
-    origin: [process.env.URL_APP, process.env.URL_API, process.env.GOOGLE_OAUTH_URL],
+    origin: [process.env.URL_APP, process.env.URL_API, process.env.GOOGLE_OAUTH_URL, process.env.ALLOWED_URI],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   }),
@@ -87,21 +98,19 @@ if (server.get('env') === 'production') {
   sessionOptions.cookie['secure'] = true // serve secure cookies
 }
 
-server.get('/test', (_, res) => {
-  console.log('API server got request from APP server or browser');
-  res.json('test');
-});
-
 // Google authentication
 setupGoogleOAuth({ server })
 // API routes
-api(server);
-
-
+// api(server);
+if (process.env.BASE_PATH)
+  server.use(process.env.BASE_PATH, apiRouter)
+else
+  server.use(apiRouter)
 
 // Every unsatisfactory request returns 403 status code
 server.get('*', (_, res) => {
-  res.sendStatus(403);
+  console.log(process.env.BASE_PATH)
+  res.json('Nothing here!');
 });
 
 

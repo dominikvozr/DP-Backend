@@ -180,6 +180,8 @@ class ExamClass extends mongoose.Model {
   }
 
   public static async getExams(user: any, page: number | null) {
+    console.log(user);
+    
     const limit = 8
     const skip = page ? (page-1) * limit : 0
     const examsCount = await this.count()

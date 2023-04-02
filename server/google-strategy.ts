@@ -40,7 +40,7 @@ const setupGoogleOAuth = ({ server }) => {
   passport.use(new OAuth2Strategy({
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: 'http://localhost:8000/auth/google/callback'
+          callbackURL: process.env.URL_API + '/auth/google/callback'
       }, verify
   ));
 
@@ -57,7 +57,9 @@ const setupGoogleOAuth = ({ server }) => {
   server.use(passport.initialize());
   server.use(passport.session());
 
-  server.get('/auth/google', (req, res, next) => {
+  //const prefix = process.env.BASE_PATH
+
+  server.get('/server/auth/google', (req, res, next) => {
     const options = {
       scope: ['profile', 'email'],
       prompt: 'select_account',
@@ -66,12 +68,12 @@ const setupGoogleOAuth = ({ server }) => {
     passport.authenticate('google', options)(req, res, next);
   });
 
-  server.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login' }),
+  server.get('/server/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/server/login' }),
     (_, res) => {
 
     // Successful authentication, redirect home.
-    res.redirect(`${process.env.URL_APP}`);
+    res.redirect(`${process.env.URL_APP}/`);
   });
 }
 
