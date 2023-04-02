@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
     callback(null, randomName);
   },
 });
-const upload = multer({ storage: storage}) // for parsing multipart/form-data
+const upload = multer({ storage: storage }) // for parsing multipart/form-data
 const router = express.Router();
 
 

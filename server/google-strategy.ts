@@ -40,7 +40,7 @@ const setupGoogleOAuth = ({ server }) => {
   passport.use(new OAuth2Strategy({
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: process.env.URL_API + '/auth/google/callback'
+          callbackURL: process.env.URL_API + '/server/auth/google/callback'
       }, verify
   ));
 
@@ -69,7 +69,7 @@ const setupGoogleOAuth = ({ server }) => {
   });
 
   server.get('/server/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login' }),
+    passport.authenticate('google', { failureRedirect: '/server/login' }),
     (_, res) => {
 
     // Successful authentication, redirect home.
