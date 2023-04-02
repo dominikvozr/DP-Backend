@@ -40,7 +40,7 @@ const setupGoogleOAuth = ({ server }) => {
   passport.use(new OAuth2Strategy({
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: process.env.URL_API + 'server/auth/google/callback'
+          callbackURL: process.env.URL_API + '/server/auth/google/callback'
       }, verify
   ));
 
