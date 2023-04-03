@@ -8,7 +8,7 @@ export async function createOrUpdateGiteaUser(email, name) {
     // Search for the user in Gitea
     const searchResponse = await axios.get(`${giteaApiUrl}/users/search`, {
       headers: { Authorization: `token ${giteaAdminAccessToken}` },
-      params: { q: email },
+      params: { q: name },
     });
 
     // If the user exists, return the user and their token

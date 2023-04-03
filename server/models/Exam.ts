@@ -218,8 +218,6 @@ class ExamClass extends mongoose.Model {
 
     const modifier = { displayName: user.displayName, avatarUrl, slug: user.slug };
 
-    console.log(user.slug);
-
     if (name !== user.displayName) {
       modifier.displayName = name;
      // modifier.slug = await generateSlug(this, name);

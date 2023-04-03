@@ -1,7 +1,6 @@
+import axios from 'axios';
 import * as express from 'express';
 import { generateSlug } from '../../utils/slugify';
-import { giteaAxios } from '../git';
-//import { UserDocument } from 'server/models/User';
 import Exam from './../../models/Exam';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
@@ -40,63 +39,81 @@ const router = express.Router();
 router.post('/create', async (req: any, res, next) => {
   try {
     const slug = await generateSlug(Exam, req.body.name);
+    const defaultBranch = 'main'
+    const projectsFolder = `upload/projects/${Math.random().toString(36).slice(-8)}`
+    const testsFolder = `upload/tests/${Math.random().toString(36).slice(-8)}`
+    const zipFilePath = req.body.project.path;
+    const testFilePath = req.body.testsFile.path;
+    const testFile = testFilePath.split('/').pop()
+    const accessToken = req.user.gitea.accessToken.sha1
+    const username = req.user.gitea.username
 
     // create repository
-    const examRepoResponse = await giteaAxios(req.user.gitea.accessToken.sha1).post(`/user/repos`, {name: `${slug}-exam`});
+    const examRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
+    {
+      name: `${slug}-exam`,
+      private: true,
+      default_branch: defaultBranch,
+    },
+    {
+      headers: {
+        Authorization: `token ${req.user.gitea.accessToken.sha1}`
+      }
+    });
     if (examRepoResponse.status > 299) {
       throw new Error('Failed to create Repository');
     }
 
-    const testRepoResponse = await giteaAxios(req.user.gitea.accessToken.sha1).post(`/user/repos`, {name: `${slug}-test`});
+    const testRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
+    {
+      name: `${slug}-test`,
+      private: true,
+      default_branch: defaultBranch,
+    },
+    {
+      headers: {
+        Authorization: `token ${req.user.gitea.accessToken.sha1}`
+      }
+    });
     if (testRepoResponse.status > 299) {
       throw new Error('Failed to create Repository');
     }
 
-    // Extract zip file to projects folder
-    // const user = req.user as UserDocument
-    const projectsFolder = `upload/projects/${Math.random().toString(36).slice(-8)}`
-    const testsFolder = `upload/pipelines/${Math.random().toString(36).slice(-8)}`
-    const zipFilePath = req.body.project.path;
-    const testFilePath = req.body.testsFile.path;
+    fs.mkdirSync(testsFolder, { recursive: true })
+    fs.rename(testFilePath, `${testsFolder}/${testFile}`, function (err) {
+      if (err) throw err
+    })
 
-
-    fs.createReadStream(testFilePath)
-      .mkdirSync(testsFolder, { recursive: true })
-      .on('finish', () => {
-        // Initialize git repository in projects folder and commit changes
-        const git = simpleGit(testsFolder);
-        git.init()
-          .add('./*')
-          .commit('Initial commit')
-          .addRemote('origin', `${process.env.GITEA_URL}/api/v1/${req.user.gitea.username}/${slug}-test.git`)
-          .push('origin', 'master', () => {
-            console.log('Changes committed to GitHub');
-            rimraf(testsFolder, () => {
-              console.log('Projects folder cleaned up');
-            });
-          });
-      });
-
+    // Initialize git repository in projects folder and commit changes
+    const git = simpleGit(testsFolder);
+    await git.init()
+    await git.add('./*')
+    await git.commit('Initial commit')
+    // Push the changes
+    const gitProjRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-test.git`, defaultBranch);
+    console.log(gitProjRes, 'Changes committed to GitHub');
+    const rimrafRes = await rimraf(projectsFolder);
+      if(rimrafRes)
+        console.log('Projects folder cleaned up');
 
     fs.createReadStream(zipFilePath)
       .pipe(unzipper.Extract({ path: projectsFolder }))
-      .on('finish', () => {
+      .on('finish', async () => {
         console.log('Zip file extracted successfully');
 
         // Initialize git repository in projects folder and commit changes
         const git = simpleGit(projectsFolder);
         if (!fs.existsSync(`${projectsFolder}/.git`))
-          git.init()
+          await git.init()
 
-        git.add('./*')
-          .commit('Initial commit')
-          .addRemote('origin', `${process.env.GITEA_URL}/api/v1/${req.user.gitea.username}/${slug}-exam.git`)
-          .push('origin', 'master', () => {
-            console.log('Changes committed to GitHub');
-            rimraf(projectsFolder, () => {
-              console.log('Projects folder cleaned up');
-            });
-          });
+        await git.add('./*')
+        await git.commit('Initial commit')
+        const gitExamRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-exam.git`, defaultBranch);
+        console.log(gitExamRes, 'Changes committed to GitHub');
+        const rimrafRes = await rimraf(testsFolder);
+        if(rimrafRes)
+          console.log('Projects folder cleaned up');
+
       });
 
     const exam = await Exam.createExam(req.body, req.user, slug);
