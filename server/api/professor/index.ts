@@ -39,7 +39,7 @@ const router = express.Router();
 
 router.post('/create', async (req: any, res, next) => {
   try {
-    const slug = await generateSlug(this, req.body.name);
+    const slug = await generateSlug(Exam, req.body.name);
 
     // create repository
     const examRepoResponse = await giteaAxios.post(`/user/repos`, {name: `${slug}-exam`});
