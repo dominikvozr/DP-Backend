@@ -146,7 +146,7 @@ router.get('/delete/:id', async (req, res, next) => {
   }
 })
 
-router.post('/upload/project', upload.single('project'), (req: MulterRequest, res, next) => {
+router.post('/upload/project', upload.single('project'), (req: MulterRequest, res) => {
   res.json(req.file)
 });
 
