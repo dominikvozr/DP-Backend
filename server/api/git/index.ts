@@ -1,9 +1,9 @@
 import axios from 'axios';
 import * as express from 'express';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs');
+//const fs = require('fs');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const multer = require('multer')
+/* const multer = require('multer')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const unzipper = require('unzipper');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -31,7 +31,7 @@ const storage = multer.diskStorage({
     callback(null, randomName + extension);
   },
 });
-const upload = multer({ storage: storage}) // for parsing multipart/form-data
+const upload = multer({ storage: storage}) // for parsing multipart/form-data */
 const router = express.Router();
 const giteaApiUrl = `${process.env.GITEA_URL}/api/v1`;
 

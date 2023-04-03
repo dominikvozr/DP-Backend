@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { generateSlug } from 'server/utils/slugify';
+import { generateSlug } from '../../utils/slugify';
 import { giteaAxios } from '../git';
 //import { UserDocument } from 'server/models/User';
 import Exam from './../../models/Exam';
