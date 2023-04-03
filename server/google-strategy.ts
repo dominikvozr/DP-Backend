@@ -24,8 +24,6 @@ const setupGoogleOAuth = ({ server }) => {
 
     try {
       const gitea = await createOrUpdateGiteaUser(email, profile.displayName);
-      console.log(gitea);
-      
       const user = await User.signInOrSignUpViaGoogle({
         googleId: profile.id,
         email,
@@ -34,7 +32,6 @@ const setupGoogleOAuth = ({ server }) => {
         avatarUrl,
         gitea
       });
-
 
       done(null, user);
     } catch (err) {
@@ -63,8 +60,6 @@ const setupGoogleOAuth = ({ server }) => {
   server.use(passport.initialize());
   server.use(passport.session());
 
-  //const prefix = process.env.BASE_PATH
-
   server.get('/server/auth/google', (req, res, next) => {
     const options = {
       scope: ['profile', 'email'],
@@ -77,7 +72,7 @@ const setupGoogleOAuth = ({ server }) => {
   server.get('/server/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/server/login' }),
     (req, res) => {
-    req.session.giteaAccessToken = req.user.gitea.access_token;
+    req.session.giteaAccessToken = req.user.gitea.accessToken.sha1;
 
     res.redirect(`${process.env.URL_APP}/`);
   });

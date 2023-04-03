@@ -1,4 +1,6 @@
 import * as express from 'express';
+import { generateSlug } from 'server/utils/slugify';
+import { giteaAxios } from '../git';
 //import { UserDocument } from 'server/models/User';
 import Exam from './../../models/Exam';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -10,7 +12,7 @@ const unzipper = require('unzipper');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const simpleGit = require('simple-git');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-//const rimraf = require('rimraf');
+const rimraf = require('rimraf');
 
 
 // MulterRequest to prevent errors
@@ -37,7 +39,67 @@ const router = express.Router();
 
 router.post('/create', async (req: express.Request, res, next) => {
   try {
-    const exam = await Exam.createExam(req.body, req.user);
+    const slug = await generateSlug(this, req.body.name);
+
+    // create repository
+    const examRepoResponse = await giteaAxios.post(`/user/repos`, {name: `${slug}-exam`});
+    if (examRepoResponse.status > 299) {
+      throw new Error('Failed to create Repository');
+    }
+
+    const testRepoResponse = await giteaAxios.post(`/user/repos`, {name: `${slug}-test`});
+    if (testRepoResponse.status > 299) {
+      throw new Error('Failed to create Repository');
+    }
+
+    // Extract zip file to projects folder
+    // const user = req.user as UserDocument
+    const projectsFolder = `upload/projects/${Math.random().toString(36).slice(-8)}`
+    const testsFolder = `upload/pipelines/${Math.random().toString(36).slice(-8)}`
+    const zipFilePath = req.body.project.path;
+    const testFilePath = req.body.testsFile.path;
+
+
+    fs.createReadStream(testFilePath)
+      .mkdir(testsFolder, { recursive: true })
+      .on('finish', () => {
+        // Initialize git repository in projects folder and commit changes
+        const git = simpleGit(testsFolder);
+        git.init()
+        git.add('./*')
+          .commit('Initial commit')
+          .addRemote('origin', `${process.env.GITEA_URL}/api/v1/${req.user.gitea.username}/${slug}-test.git`)
+          .push('origin', 'master', () => {
+            console.log('Changes committed to GitHub');
+            rimraf(testsFolder, () => {
+              console.log('Projects folder cleaned up');
+            });
+          });
+      });
+
+
+    fs.createReadStream(zipFilePath)
+      .pipe(unzipper.Extract({ path: projectsFolder }))
+      .on('finish', () => {
+        console.log('Zip file extracted successfully');
+
+        // Initialize git repository in projects folder and commit changes
+        const git = simpleGit(projectsFolder);
+        if (!fs.existsSync(`${projectsFolder}/.git`))
+          git.init()
+
+        git.add('./*')
+          .commit('Initial commit')
+          .addRemote('origin', `${process.env.GITEA_URL}/api/v1/${req.user.gitea.username}/${slug}-exam.git`)
+          .push('origin', 'master', () => {
+            console.log('Changes committed to GitHub');
+            rimraf(projectsFolder, () => {
+              console.log('Projects folder cleaned up');
+            });
+          });
+      });
+
+    const exam = await Exam.createExam(req.body, req.user, slug);
     res.json({exam, message: 'success'});
   } catch (err) {
     next(err);
@@ -85,46 +147,7 @@ router.get('/delete/:id', async (req, res, next) => {
 })
 
 router.post('/upload/project', upload.single('project'), (req: MulterRequest, res, next) => {
-  try {
-    // Extract zip file to projects folder
-    //const user = req.user as UserDocument
-    const zipFilePath = req.file.path;
-    const projectsFolder = 'upload/projects/';
-    fs.createReadStream(zipFilePath)
-      .pipe(unzipper.Extract({ path: projectsFolder }))
-      .on('finish', () => {
-        console.log('Zip file extracted successfully');
-
-        // Initialize git repository in projects folder and commit changes
-        const git = simpleGit(projectsFolder);
-        if (fs.existsSync(`${projectsFolder}/.git`)) {
-          console.log('Git repository already exists in projects folder');
-          git.add('./*')
-            .commit('New changes')
-            /* .addRemote('origin', `https://0.0.0.0:1234/${user.email}/${req.body.name}.git`)
-            .push('origin', 'master', () => {
-              console.log('Changes pushed to GitHub');
-              rimraf(projectsFolder, () => {
-                console.log('Projects folder cleaned up');
-              });
-            }); */
-        } else {
-          git.init()
-            .add('./*')
-            .commit('Initial commit')
-            /* .addRemote('origin', `https://0.0.0.0:1234/${user.email}/${req.body.name}.git`)
-            .push('origin', 'master', () => {
-              console.log('Changes committed to GitHub');
-              rimraf(projectsFolder, () => {
-                console.log('Projects folder cleaned up');
-              });
-            }); */
-        }
-      });
-      res.json(req.file)
-  } catch (err) {
-    next(err);
-  }
+  res.json(req.file)
 });
 
 router.post('/upload/tests', upload.single('tests'), (req: MulterRequest, res, next) => {
