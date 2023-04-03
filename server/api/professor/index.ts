@@ -61,7 +61,7 @@ router.post('/create', async (req: any, res, next) => {
 
 
     fs.createReadStream(testFilePath)
-      .mkdir(testsFolder, { recursive: true })
+      .mkdirSync(testsFolder, { recursive: true })
       .on('finish', () => {
         // Initialize git repository in projects folder and commit changes
         const git = simpleGit(testsFolder);
