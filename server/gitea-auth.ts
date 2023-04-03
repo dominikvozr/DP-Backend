@@ -20,24 +20,36 @@ export async function createOrUpdateGiteaUser(email, name) {
     console.error('Error searching for Gitea user:', error);
   }
 
+  const username = email.replace('@', '.')
+  const password = Math.random().toString(36).slice(-8)
+
   // If the user doesn't exist, create a new user in Gitea
   try {
     const newUser = {
       email,
       login_name: email,
-      username: email.split('@')[0],
+      username,
       full_name: name,
       must_change_password: false,
       send_notify: false,
-      source_id: 0, // Local authentication source
-      password: Math.random().toString(36).slice(-8), // Generate a random password
+      source_id: 0,
+      password,
     };
 
     const createResponse = await axios.post(`${giteaApiUrl}/admin/users`, newUser, {
       headers: { Authorization: `token ${giteaAdminAccessToken}` },
     });
 
+    // Encode the username and password using Base64
+    const token = Buffer.from(`${username}:${password}`).toString('base64');
+
+    // Authenticate and then create & get access token
+    const accessToken = await axios.post(`${giteaApiUrl}/users/${username}/tokens`, {name: 'studentcode-api'}, {
+      headers: { Authorization: `Basic ${token}` },
+    });
+
     const giteaUser = createResponse.data;
+    giteaUser.accessToken = accessToken.data;
     return giteaUser;
   } catch (error) {
     console.error('Error creating Gitea user:', error);

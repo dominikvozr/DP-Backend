@@ -24,6 +24,8 @@ const setupGoogleOAuth = ({ server }) => {
 
     try {
       const gitea = await createOrUpdateGiteaUser(email, profile.displayName);
+      console.log(gitea);
+      
       const user = await User.signInOrSignUpViaGoogle({
         googleId: profile.id,
         email,
