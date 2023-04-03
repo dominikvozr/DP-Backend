@@ -45,7 +45,7 @@ export const giteaAxios = axios.create({
 });
 
 // Get user repositories
-router.get('/api/user/repos', async (req, res) => {
+router.get('/api/user/repos', async (req: any, res: any) => {
   try {
     const response = await giteaAxios.get(`/users/${req.user.gitea.username}/repos`);
     res.json(response.data);
@@ -55,7 +55,7 @@ router.get('/api/user/repos', async (req, res) => {
 });
 
 // Get repository by ID
-router.get('/api/repos/:id', async (req, res) => {
+router.get('/api/repos/:id', async (req: any, res: any) => {
   try {
     const response = await giteaAxios.get(`/repos/${req.user.gitea.username}/${req.params.id}`);
     res.json(response.data);
@@ -65,7 +65,7 @@ router.get('/api/repos/:id', async (req, res) => {
 });
 
 // Update repository by ID
-router.put('/api/repos/:id', async (req, res) => {
+router.put('/api/repos/:id', async (req: any, res: any) => {
   try {
     const updateData = req.body;
     const response = await giteaAxios.patch(`/repos/${req.user.gitea.username}/${req.params.id}`, updateData);
@@ -76,7 +76,7 @@ router.put('/api/repos/:id', async (req, res) => {
 });
 
 // Delete repository by ID
-router.delete('/api/repos/:id', async (req, res) => {
+router.delete('/api/repos/:id', async (req: any, res: any) => {
   try {
     await giteaAxios.delete(`/repos/${req.user.gitea.username}/${req.params.id}`);
     res.status(204).end();
@@ -86,7 +86,7 @@ router.delete('/api/repos/:id', async (req, res) => {
 });
 
 // Show repository by ID
-router.get('/api/repos/:id/show', async (req, res) => {
+router.get('/api/repos/:id/show', async (req: any, res: any) => {
   try {
     const response = await giteaAxios.get(`/repos/${req.user.gitea.username}/${req.params.id}`);
     res.json(response.data);
@@ -96,7 +96,7 @@ router.get('/api/repos/:id/show', async (req, res) => {
 });
 
 // Upload repository
-router.post('/api/upload/repo', async (req, res) => {
+router.post('/api/upload/repo', async (req: any, res: any) => {
   try {
     const repoData = req.body;
     const response = await giteaAxios.post(`/user/repos`, repoData);
@@ -107,7 +107,7 @@ router.post('/api/upload/repo', async (req, res) => {
 });
 
 // Upload file to repository with commit message and push
-router.post('/api/repos/:id/upload', async (req, res) => {
+router.post('/api/repos/:id/upload', async (req: any, res: any) => {
   try {
     const { content, filepath, message, branch } = req.body;
 

@@ -37,7 +37,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage}) // for parsing multipart/form-data
 const router = express.Router();
 
-router.post('/create', async (req: express.Request, res, next) => {
+router.post('/create', async (req: any, res, next) => {
   try {
     const slug = await generateSlug(this, req.body.name);
 
