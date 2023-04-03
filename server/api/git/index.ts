@@ -36,18 +36,28 @@ const router = express.Router();
 const giteaApiUrl = `${process.env.GITEA_URL}/api/v1`;
 
 // Axios instance for Gitea API requests
-export const giteaAxios = axios.create({
+/* export const giteaAdminAxios = axios.create({
   baseURL: giteaApiUrl,
   headers: {
     // Add the Gitea API token here
     'Authorization': `token ${process.env.GITEA_API_TOKEN}`,
   },
-});
+}); */
+
+export function giteaAxios(token: string) {
+  return axios.create({
+    baseURL: giteaApiUrl,
+    headers: {
+      // Add the Gitea API token here
+      'Authorization': `token ${token}`,
+    },
+  })
+};
 
 // Get user repositories
 router.get('/api/user/repos', async (req: any, res: any) => {
   try {
-    const response = await giteaAxios.get(`/users/${req.user.gitea.username}/repos`);
+    const response = await giteaAxios(process.env.GITEA_API_TOKEN).get(`/users/${req.user.gitea.username}/repos`);
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -57,7 +67,7 @@ router.get('/api/user/repos', async (req: any, res: any) => {
 // Get repository by ID
 router.get('/api/repos/:id', async (req: any, res: any) => {
   try {
-    const response = await giteaAxios.get(`/repos/${req.user.gitea.username}/${req.params.id}`);
+    const response = await giteaAxios(process.env.GITEA_API_TOKEN).get(`/repos/${req.user.gitea.username}/${req.params.id}`);
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -68,7 +78,7 @@ router.get('/api/repos/:id', async (req: any, res: any) => {
 router.put('/api/repos/:id', async (req: any, res: any) => {
   try {
     const updateData = req.body;
-    const response = await giteaAxios.patch(`/repos/${req.user.gitea.username}/${req.params.id}`, updateData);
+    const response = await giteaAxios(process.env.GITEA_API_TOKEN).patch(`/repos/${req.user.gitea.username}/${req.params.id}`, updateData);
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -78,7 +88,7 @@ router.put('/api/repos/:id', async (req: any, res: any) => {
 // Delete repository by ID
 router.delete('/api/repos/:id', async (req: any, res: any) => {
   try {
-    await giteaAxios.delete(`/repos/${req.user.gitea.username}/${req.params.id}`);
+    await giteaAxios(process.env.GITEA_API_TOKEN).delete(`/repos/${req.user.gitea.username}/${req.params.id}`);
     res.status(204).end();
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -88,7 +98,7 @@ router.delete('/api/repos/:id', async (req: any, res: any) => {
 // Show repository by ID
 router.get('/api/repos/:id/show', async (req: any, res: any) => {
   try {
-    const response = await giteaAxios.get(`/repos/${req.user.gitea.username}/${req.params.id}`);
+    const response = await giteaAxios(process.env.GITEA_API_TOKEN).get(`/repos/${req.user.gitea.username}/${req.params.id}`);
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -99,7 +109,7 @@ router.get('/api/repos/:id/show', async (req: any, res: any) => {
 router.post('/api/upload/repo', async (req: any, res: any) => {
   try {
     const repoData = req.body;
-    const response = await giteaAxios.post(`/user/repos`, repoData);
+    const response = await giteaAxios(process.env.GITEA_API_TOKEN).post(`/user/repos`, repoData);
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -111,7 +121,7 @@ router.post('/api/repos/:id/upload', async (req: any, res: any) => {
   try {
     const { content, filepath, message, branch } = req.body;
 
-    const response = await giteaAxios.put(
+    const response = await giteaAxios(process.env.GITEA_API_TOKEN).put(
       `/repos/${req.user.gitea.username}/${req.params.id}/contents/${filepath}`,
       {
         content: Buffer.from(content).toString('base64'),

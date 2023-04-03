@@ -42,12 +42,12 @@ router.post('/create', async (req: any, res, next) => {
     const slug = await generateSlug(Exam, req.body.name);
 
     // create repository
-    const examRepoResponse = await giteaAxios.post(`/user/repos`, {name: `${slug}-exam`});
+    const examRepoResponse = await giteaAxios(req.user.gitea.accessToken.sha1).post(`/user/repos`, {name: `${slug}-exam`});
     if (examRepoResponse.status > 299) {
       throw new Error('Failed to create Repository');
     }
 
-    const testRepoResponse = await giteaAxios.post(`/user/repos`, {name: `${slug}-test`});
+    const testRepoResponse = await giteaAxios(req.user.gitea.accessToken.sha1).post(`/user/repos`, {name: `${slug}-test`});
     if (testRepoResponse.status > 299) {
       throw new Error('Failed to create Repository');
     }
@@ -66,7 +66,7 @@ router.post('/create', async (req: any, res, next) => {
         // Initialize git repository in projects folder and commit changes
         const git = simpleGit(testsFolder);
         git.init()
-        git.add('./*')
+          .add('./*')
           .commit('Initial commit')
           .addRemote('origin', `${process.env.GITEA_URL}/api/v1/${req.user.gitea.username}/${slug}-test.git`)
           .push('origin', 'master', () => {
