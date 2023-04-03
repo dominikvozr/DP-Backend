@@ -30,7 +30,7 @@ const setUserCookie = (_req: Request, res: Response, next: NextFunction ) => {
     next();
 };
 // Middleware to set org ID in cookie for future calls
-const setORGCookie = (_req: Request, res: Response, next: NextFunction ) => {
+export const setORGCookie = (_req: Request, res: Response, next: NextFunction ) => {
     res.cookie('ORG', ORG);
     next();
 };
