@@ -14,6 +14,12 @@ RUN npm ci
 # Copy the source code into the build image
 COPY ./ ./
 
+# Install Git
+RUN apt-get update && \
+    apt-get install -y git && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Expose port 3000 (default port)
 EXPOSE 8080
 
