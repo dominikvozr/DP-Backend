@@ -62,7 +62,7 @@ spec:
     stage('Generate Image Tag') {
       steps {
         script {
-          env.IMAGE_TAG = "${env.BUILD_NUMBER}"
+          env.IMAGE_TAG = "${env.BRANCH_NAME}${env.GIT_COMMIT}"
         }
       }
     }
