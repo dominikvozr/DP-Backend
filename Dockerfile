@@ -4,6 +4,10 @@ FROM node:19.2-alpine3.15 as build
 # Set the working directory to /usr/src/app
 WORKDIR /usr/src/app
 
+# Install Git
+RUN apk update && \
+    apk add git
+
 # Copy the package.json and package-lock.json over in the intermediate "build" image
 COPY package*.json ./
 
@@ -15,7 +19,7 @@ RUN npm ci
 COPY ./ ./
 
 # Build the TypeScript application for production
-RUN npm run build
+# RUN npm run build
 
 # Intermediate docker image to build the bundle in and install dependencies
 FROM node:19.2-alpine3.15 as production
@@ -32,9 +36,6 @@ RUN npm ci --only=production
 
 # Copy the source code into the build image
 COPY --from=build /usr/src/app/dist /usr/src/app/dist
-
-# Install Git
-RUN apk add git
 
 # Expose port 3000 (default port)
 EXPOSE 8080
