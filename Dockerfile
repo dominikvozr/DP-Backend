@@ -1,5 +1,5 @@
 # Intermediate docker image to build the bundle in and install dependencies
-FROM node:19.2-bullseye-slim as build
+FROM node:19.2-alpine3.15 as build
 
 # Set the working directory to /usr/src/app
 WORKDIR /usr/src/app
@@ -24,7 +24,7 @@ RUN apt update && \
 # RUN npm run build
 
 # Intermediate docker image to build the bundle in and install dependencies
-FROM node:19.2-bullseye-slim as production
+FROM node:19.2-alpine3.15 as production
 
 # Set the working directory to /usr/src/app
 WORKDIR /usr/src/app
