@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 # Install Git
 RUN apk update && \
-    apk add git
+    apk add --no-cache git
 
 # Copy the package.json and package-lock.json over in the intermediate "build" image
 COPY package*.json ./
