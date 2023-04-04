@@ -1,12 +1,8 @@
 # Intermediate docker image to build the bundle in and install dependencies
-FROM node:19.2-alpine3.15 as build
+FROM node:19.2-bullseye-slim as build
 
 # Set the working directory to /usr/src/app
 WORKDIR /usr/src/app
-
-# Install Git
-RUN apk update && \
-    apk add --no-cache git
 
 # Copy the package.json and package-lock.json over in the intermediate "build" image
 COPY package*.json ./
@@ -22,7 +18,7 @@ COPY ./ ./
 # RUN npm run build
 
 # Intermediate docker image to build the bundle in and install dependencies
-FROM node:19.2-alpine3.15 as production
+FROM node:19.2-bullseye-slim as production
 
 # Set the working directory to /usr/src/app
 WORKDIR /usr/src/app
