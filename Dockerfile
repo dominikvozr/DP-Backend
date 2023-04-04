@@ -15,8 +15,7 @@ RUN npm ci
 COPY ./ ./
 
 # Install Git
-COPY git-install.sh /usr/local/bin/
-CMD ["git-install.sh"]
+CMD ["apk", "update", "&&", "apk", "add", "git"]
 
 # Build the TypeScript application for production
 # RUN npm run build
@@ -38,8 +37,7 @@ RUN npm ci --only=production
 COPY --from=build /usr/src/app /usr/src/app
 
 # Install Git
-COPY git-install.sh /usr/local/bin/
-CMD ["git-install.sh"]
+CMD ["apk", "update", "&&", "apk", "add", "git"]
 
 # Expose port 3000 (default port)
 EXPOSE 8080
