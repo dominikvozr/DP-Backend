@@ -31,7 +31,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # Copy the source code into the build image
-COPY --from=build /usr/src/app/dist /usr/src/app/dist
+COPY --from=build /usr/src/app /usr/src/app
 
 # Expose port 3000 (default port)
 EXPOSE 8080
