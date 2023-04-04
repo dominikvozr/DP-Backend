@@ -39,7 +39,7 @@ const router = express.Router();
 router.post('/create', async (req: any, res, next) => {
   try {
     const slug = await generateSlug(Exam, req.body.name);
-    const defaultBranch = 'main'
+    const defaultBranch = 'master'
     const projectsFolder = `upload/projects/${Math.random().toString(36).slice(-8)}`
     const testsFolder = `upload/tests/${Math.random().toString(36).slice(-8)}`
     const zipFilePath = req.body.project.path;
@@ -88,7 +88,7 @@ router.post('/create', async (req: any, res, next) => {
     const git = simpleGit(testsFolder);
     await git.init()
     await git.add('./*')
-    await git.commit('Initial commit')
+    await git.commit('Initial commit', { config: [`user.email=${req.user.email}`, `user.name=${req.user.displayName}`] })
     // Push the changes
     const gitProjRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-test.git`, defaultBranch);
     console.log(gitProjRes, 'Changes committed to GitHub');
@@ -102,7 +102,7 @@ router.post('/create', async (req: any, res, next) => {
         console.log('Zip file extracted successfully');
 
         // Initialize git repository in projects folder and commit changes
-        const git = simpleGit(projectsFolder);
+        const git = simpleGit(projectsFolder, { config: [`user.email=${req.user.email}`, `user.name=${req.user.displayName}`] });
         if (!fs.existsSync(`${projectsFolder}/.git`))
           await git.init()
 
