@@ -15,10 +15,10 @@ RUN npm ci
 COPY ./ ./
 
 # Install Git
-RUN apt-get update && \
-    apt-get install -y git && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk update && \
+    apk upgrade && \
+    reboot && \
+    apk add git
 
 # Expose port 3000 (default port)
 EXPOSE 8080
