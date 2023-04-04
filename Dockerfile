@@ -15,9 +15,9 @@ RUN npm ci
 COPY ./ ./
 
 # Install Git
-RUN apt-get update && \
-    apt-get install -y git && \
-    apt-get clean && \
+RUN apt update && \
+    apt install -y git && \
+    apt clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Build the TypeScript application for production
@@ -40,9 +40,9 @@ RUN npm ci --only=production
 COPY --from=build /usr/src/app /usr/src/app
 
 # Install Git
-RUN apt-get update && \
-    apt-get install -y git && \
-    apt-get clean && \
+RUN apt update && \
+    apt install -y git && \
+    apt clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Expose port 3000 (default port)
