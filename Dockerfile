@@ -33,6 +33,12 @@ RUN npm ci --only=production
 # Copy the source code into the build image
 COPY --from=build /usr/src/app /usr/src/app
 
+# Install Git
+RUN apt-get update && \
+    apt-get install -y git && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Expose port 3000 (default port)
 EXPOSE 8080
 
