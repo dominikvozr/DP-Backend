@@ -39,7 +39,7 @@ const router = express.Router();
 router.post('/create', async (req: any, res, next) => {
   try {
     const slug = await generateSlug(Exam, req.body.name);
-    const defaultBranch = 'main'
+    const defaultBranch = 'master'
     const projectsFolder = `upload/projects/${Math.random().toString(36).slice(-8)}`
     const testsFolder = `upload/tests/${Math.random().toString(36).slice(-8)}`
     const zipFilePath = req.body.project.path;
@@ -85,7 +85,7 @@ router.post('/create', async (req: any, res, next) => {
     })
 
     // Initialize git repository in projects folder and commit changes
-    const git = simpleGit(testsFolder);
+    const git = simpleGit(testsFolder, { config: [`user.email=${req.user.email}`, `user.name=${req.user.displayName}`] });
     await git.init()
     await git.add('./*')
     await git.commit('Initial commit')
@@ -102,7 +102,7 @@ router.post('/create', async (req: any, res, next) => {
         console.log('Zip file extracted successfully');
 
         // Initialize git repository in projects folder and commit changes
-        const git = simpleGit(projectsFolder);
+        const git = simpleGit(projectsFolder, { config: [`user.email=${req.user.email}`, `user.name=${req.user.displayName}`] });
         if (!fs.existsSync(`${projectsFolder}/.git`))
           await git.init()
 
