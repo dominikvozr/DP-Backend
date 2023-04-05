@@ -8,9 +8,9 @@ const schedule = require('node-schedule');
 
 class Scheduler {
     private static _instance: Scheduler;
-    private scheduler;
-    private cabin;
-    private queueFile;
+    private scheduler: { add: (arg0: { name: string; path: any; date: Date; worker: { workerData: object; }; }) => void; jobs: any; run: () => void; };
+    private cabin: { debug: (arg0: any) => void; };
+    private queueFile: string;
 
     private constructor() {
 
@@ -103,15 +103,18 @@ class Scheduler {
     }
 
   public async scheduleExamSimple(start: Date, end: Date, jobData: {examId: string}){
-    this.scheduleExamStart(start, jobData)
-    this.scheduleExamEnd(end, jobData)
+    console.log('Scheduling exam start and end:', start, end, jobData);
+    const systemTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    console.log('Server timezone:', systemTimezone);
+    this.scheduleExamStart(start, jobData, systemTimezone)
+    this.scheduleExamEnd(end, jobData, systemTimezone)
   }
 
-  private async scheduleExamStart(start: Date, jobData: {examId: string}){
+  private async scheduleExamStart(start: Date, jobData: {examId: string}, systemTimezone: string){
     // Define the job schedule to run on a specific date and time (in this example, March 20th 2023 at 12:00:00)
-    schedule.scheduleJob(start, function() {
+    const startJob = schedule.scheduleJob({ start, rule: start, tz: systemTimezone }, function() {
       // Find the document you want to update (replace "id_of_exam" with the ID of the exam you want to update)
-      Exam.findById(jobData.examId, function(err, exam) {
+      Exam.findById(jobData.examId, function(err: any, exam: { isOpen: boolean; save: (arg0: (err: any) => void) => void; }) {
         if (err) return console.log(err);
 
         // Set the "isOpen" property of the document to "false"
@@ -121,19 +124,20 @@ class Scheduler {
 
 
         // Save the updated document
-        exam.save(function(err) {
+        exam.save(function(err: any) {
           if (err) return console.log(err);
           console.log('Exam updated successfully!');
         });
       });
     });
+    console.log('Exam start scheduled:', startJob.nextInvocation());
   }
 
-  private async scheduleExamEnd(end: Date, jobData: {examId: string}){
+  private async scheduleExamEnd(end: Date, jobData: {examId: string}, systemTimezone: string){
     // Define the job schedule to run on a specific date and time (in this example, March 20th 2023 at 12:00:00)
-      schedule.scheduleJob(end, function() {
+      const endJob = schedule.scheduleJob({ start: end, rule: end, tz: systemTimezone }, function() {
         // Find the document you want to update (replace "id_of_exam" with the ID of the exam you want to update)
-        Exam.findById(jobData.examId, function(err, exam) {
+        Exam.findById(jobData.examId, function(err: any, exam: { isOpen: boolean; save: (arg0: (err: any) => void) => void; }) {
           if (err) return console.log(err);
 
           // Set the "isOpen" property of the document to "false"
@@ -143,12 +147,13 @@ class Scheduler {
 
 
           // Save the updated document
-          exam.save(function(err) {
+          exam.save(function(err: any) {
             if (err) return console.log(err);
             console.log('Exam updated successfully!');
           });
         });
       });
+      console.log('Exam start scheduled:', endJob.nextInvocation());
   }
 }
 
