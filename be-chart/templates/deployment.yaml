@@ -37,6 +37,10 @@ spec:
             - name: http
               containerPort: 8000
               protocol: TCP
+          lifecycle:
+            postStart:
+              exec:
+                command: ["apk", "add", "git"]
           env:
             - name: MONGO_USERNAME
               valueFrom:

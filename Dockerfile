@@ -14,9 +14,6 @@ RUN npm ci
 # Copy the source code into the build image
 COPY ./ ./
 
-# Install Git
-CMD ["apk", "update", "&&", "apk", "add", "git"]
-
 # Build the TypeScript application for production
 # RUN npm run build
 
@@ -36,12 +33,9 @@ RUN npm ci --only=production
 # Copy the source code into the build image
 COPY --from=build /usr/src/app /usr/src/app
 
-# Install Git
-CMD ["apk", "update", "&&", "apk", "add", "git"]
-
 # Expose port 3000 (default port)
 EXPOSE 8080
 
 # Start the application
 # CMD [ "node", "dist/server.js" ]
-CMD [ "npm", "run", "dev"]
+CMD ["npm", "run", "dev"]

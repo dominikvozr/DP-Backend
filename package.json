@@ -42,6 +42,7 @@
         "rimraf": "^4.4.1",
         "signale": "^1.4.0",
         "simple-git": "^3.16.0",
+        "timezone": "^1.0.23",
         "ts-import": "^4.0.0-beta.10",
         "unzipper": "^0.10.11"
     },
