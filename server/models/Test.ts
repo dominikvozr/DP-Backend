@@ -4,6 +4,14 @@ import * as mongoose from 'mongoose';
 import { generateSlug } from '../utils/slugify';
 //import Exam from './Exam';
 
+interface Score {
+    points: number,
+    message: string,
+    percentage: number,
+    mark: string,
+    time: Date,
+}
+
 const testSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -66,25 +74,7 @@ interface TestModel extends mongoose.Model<TestDocument> {
 
   getTestByExamSlug(id: string, user: any): Promise<TestDocument>;
 
-  updateTest({
-    userId,
-    examId,
-    testRepo,
-    slug,
-    startedAt,
-    endedAt,
-    score,
-    isOpen,
-  }: {
-    userId: string,
-    examId: string,
-    testRepo: string,
-    slug: string,
-    startedAt: Date,
-    endedAt: Date,
-    score: Array<object>,
-    isOpen: boolean,
-  }): Promise<TestDocument>;
+  updateTestResults(testId: string, results: Score): Promise<TestDocument>;
 
   createTest({
     userId,
@@ -144,24 +134,35 @@ class TestClass extends mongoose.Model {
     return exam
   }
 
-  /* public static async updateTest({ userId, name, avatarUrl }) {
-    console.log('Static method: updateProfile');
-
-    const user = await this.findById(userId, 'slug displayName');
-
-    const modifier = { displayName: user.displayName, avatarUrl, slug: user.slug };
-
-    console.log(user.slug);
-
-    if (name !== user.displayName) {
-      modifier.displayName = name;
-     // modifier.slug = await generateSlug(this, name);
-    }
-
-    return this.findByIdAndUpdate(userId, { $set: modifier }, { new: true, runValidators: true })
-      .select('displayName avatarUrl slug')
+  public static async updateTestResults(testId, results: Score) {
+    const test = await this.findById(testId);
+    const dbResults = createResults(test, results)
+    const modifier = { results: dbResults };
+    return this.findByIdAndUpdate(testId, { $set: modifier }, { new: true, runValidators: true })
       .setOptions({ lean: true });
-  } */
+  }
+
+}
+
+function createResults(test: any, testResults) {
+  const testArr = test.exam.tests
+  let points = 0;
+
+  testResults.forEach((result) => {
+    if (result.result) {
+      const test = testArr.find((test) => test.test_function_name === result.test_function_name + '()');
+      if (test) {
+        points += test.points;
+      }
+    }
+    return {
+        points,
+        message: JSON.stringify(testResults),
+        percentage: points / test.exam.points * 100,
+        mark: '',
+        time: new Date(),
+    }
+  });
 }
 
 testSchema.loadClass(TestClass);

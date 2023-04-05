@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
   filename: (_req, file, callback) => {
     const originalName = file.originalname;
     const extension = originalName.substring(originalName.lastIndexOf('.'));
-    const randomName = Math.random().toString(36).substring(2, 15);
+    const randomName = 'tests';
     callback(null, randomName + extension);
   },
 });
@@ -92,7 +92,7 @@ router.post('/create', async (req: any, res, next) => {
     // Push the changes
     const gitProjRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-test.git`, defaultBranch);
     console.log(gitProjRes, 'Changes committed to GitHub');
-    const rimrafRes = await rimraf(projectsFolder);
+    const rimrafRes = await rimraf(testsFolder);
       if(rimrafRes)
         console.log('Projects folder cleaned up');
 
@@ -110,7 +110,7 @@ router.post('/create', async (req: any, res, next) => {
         await git.commit('Initial commit')
         const gitExamRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-exam.git`, defaultBranch);
         console.log(gitExamRes, 'Changes committed to GitHub');
-        const rimrafRes = await rimraf(testsFolder);
+        const rimrafRes = await rimraf(projectsFolder);
         if(rimrafRes)
           console.log('Projects folder cleaned up');
 
