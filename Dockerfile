@@ -23,9 +23,6 @@ FROM node:19.2-alpine3.15 as production
 # Set the working directory to /usr/src/app
 WORKDIR /usr/src/app
 
-# Install Git
-RUN apk add --no-cache git
-
 # Copy the package.json and package-lock.json over in the intermedate "build" image
 COPY package*.json ./
 
@@ -41,4 +38,4 @@ EXPOSE 8080
 
 # Start the application
 # CMD [ "node", "dist/server.js" ]
-CMD ["npm", "run", "dev"]
+CMD ["apk", "update", "&&", "apk", "add", "git", "npm", "run", "dev"]
