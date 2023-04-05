@@ -44,6 +44,18 @@ router.put('/:id/extend', setSessionTokenHeader, async (req: Request, res: Respo
 });
 
 
+// Route to autostart workspace
+router.put('/:id/autostart', setSessionTokenHeader, async (req: Request, res: Response) => {
+    try {
+        const response =
+            await axios.put(`${API_BASE_URL}/workspaces/${req.params.id}/autostart`, req.body);
+        res.json(response.data);
+    } catch (error) {
+        handleAxiosError(error, res);
+    }
+});
+
+
 // Helper function to handle Axios errors
 function handleAxiosError(error: AxiosError, res: Response) {
     res.status(error.response?.status ?? 500).json(error.response?.data ?? 'Internal Server Error');
