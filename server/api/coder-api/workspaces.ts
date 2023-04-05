@@ -43,6 +43,19 @@ router.put('/:id/extend', setSessionTokenHeader, async (req: Request, res: Respo
     }
 });
 
+// Route to redirect to workspace link
+router.post('/:workspace/session',setSessionTokenHeader, async (req: Request, res: Response) => {
+    try {
+        API_BASE_URL = `http://bawix.xyz:81/@${req.body.username}/${req.params.workspace}.main/apps/code-server`
+        res.send(`<p>email: ${req.body.email}</p>
+                        <p>heslo: ${req.body.password}</p>
+                        <script>window.open("${API_BASE_URL}/?folder=/home/coder","_blank");</script>
+                        <a href="${API_BASE_URL}/?folder=/home/coder" target="_blank">
+                        Click here to access your workspace! </a>`);
+    } catch (error) {
+        handleAxiosError(error, res);
+    }
+});
 
 // Route to autostart workspace
 router.put('/:id/autostart', setSessionTokenHeader, async (req: Request, res: Response) => {
