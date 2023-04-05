@@ -19,7 +19,6 @@ COPY ./ ./
 
 # Intermediate docker image to build the bundle in and install dependencies
 FROM node:19.2-alpine3.15 as production
-RUN apk --no-cache add git
 
 # Set the working directory to /usr/src/app
 WORKDIR /usr/src/app

@@ -27,6 +27,21 @@ spec:
       serviceAccountName: {{ include "helm-chart.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+      - name: install-git
+        image: node:19.2-alpine3.15
+        command: ["sh", "-c"]
+        args:
+        - |
+          if ! command -v git; then
+            # Install git based on your base image
+            # For Alpine:
+            apk update && apk add git
+            # For Debian/Ubuntu:
+            # apt-get update && apt-get install -y git
+            # For CentOS/RHEL/Fedora:
+            # yum -y update && yum -y install git
+          fi
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
