@@ -43,6 +43,17 @@ router.put('/:id/extend', setSessionTokenHeader, async (req: Request, res: Respo
     }
 });
 
+// Route to redirect to workspace link
+router.get('/:username/:workspace',setSessionTokenHeader, async (req: Request, res: Response) => {
+    try {
+        API_BASE_URL = `http://bawix.xyz:81/@${req.params.username}/${req.params.workspace}.main/apps/code-server`
+        res.send(`<script>window.open("${API_BASE_URL}/?folder=/home/coder","_blank");</script>
+                        <a href="${API_BASE_URL}/?folder=/home/coder" target="_blank">
+                        Click here to access your workspace! </a>`);
+    } catch (error) {
+        handleAxiosError(error, res);
+    }
+});
 
 // Helper function to handle Axios errors
 function handleAxiosError(error: AxiosError, res: Response) {
