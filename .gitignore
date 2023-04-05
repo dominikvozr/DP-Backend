@@ -1,7 +1,8 @@
-.env
 node_modules/
 .vscode
 bin/
 lib/
 upload/
+dist/
+dist-minified/
 dbvalues.yaml

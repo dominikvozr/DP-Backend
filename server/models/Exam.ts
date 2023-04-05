@@ -1,13 +1,11 @@
 // import * as _ from 'lodash';
 import * as mongoose from 'mongoose';
 import Scheduler from './../scheduler/scheduler';
-import { generateSlug } from '../utils/slugify';
 
 const examSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -139,37 +137,7 @@ interface ExamModel extends mongoose.Model<ExamDocument> {
     tests: Array<object>,
   }): Promise<ExamDocument[]>;
 
-  createExam({
-    name,
-    userId,
-    pipelineId,
-    templateId,
-    subject,
-    description,
-    projectRepo,
-    testRepo,
-    slug,
-    startDate,
-    endDate,
-    createdAt,
-    points,
-    tests,
-  }: {
-    name: string,
-    userId: string,
-    pipelineId: string,
-    templateId: string,
-    subject: string,
-    description: string,
-    projectRepo: string,
-    testRepo: string,
-    slug: string,
-    startDate: Date,
-    endDate: Date,
-    createdAt: Date,
-    points: number,
-    tests: Array<object>,
-  }, user: Express.User): Promise<ExamDocument[]>;
+  createExam(data: ExamDocument, user: Express.User, slug: string): Promise<ExamDocument[]>;
 }
 
 class ExamClass extends mongoose.Model {
@@ -180,8 +148,6 @@ class ExamClass extends mongoose.Model {
   }
 
   public static async getExams(user: any, page: number | null) {
-    console.log(user);
-    
     const limit = 8
     const skip = page ? (page-1) * limit : 0
     const examsCount = await this.count()
@@ -217,8 +183,7 @@ class ExamClass extends mongoose.Model {
       return {status: 'forbidden', isAuthenticated: false}
   }
 
-  public static async createExam(data, user) {
-    const slug = await generateSlug(this, data.name);
+  public static async createExam(data, user, slug) {
 
     data['user'] = user._id
     data['slug'] = slug
@@ -250,8 +215,6 @@ class ExamClass extends mongoose.Model {
     const user = await this.findById(userId, 'slug displayName');
 
     const modifier = { displayName: user.displayName, avatarUrl, slug: user.slug };
-
-    console.log(user.slug);
 
     if (name !== user.displayName) {
       modifier.displayName = name;

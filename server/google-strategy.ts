@@ -1,5 +1,6 @@
 import * as passport from 'passport';
 import { OAuth2Strategy } from 'passport-google-oauth';
+import { createOrUpdateGiteaUser } from './gitea-auth';
 import User, { UserDocument } from './models/User';
 // eslint-disable-next-line
 require('dotenv').config();
@@ -22,12 +23,14 @@ const setupGoogleOAuth = ({ server }) => {
     }
 
     try {
+      const gitea = await createOrUpdateGiteaUser(email, profile.displayName);
       const user = await User.signInOrSignUpViaGoogle({
         googleId: profile.id,
         email,
         googleToken: { accessToken, refreshToken },
         displayName: profile.displayName,
         avatarUrl,
+        gitea
       });
 
       done(null, user);
@@ -57,8 +60,6 @@ const setupGoogleOAuth = ({ server }) => {
   server.use(passport.initialize());
   server.use(passport.session());
 
-  //const prefix = process.env.BASE_PATH
-
   server.get('/server/auth/google', (req, res, next) => {
     const options = {
       scope: ['profile', 'email'],
@@ -70,9 +71,9 @@ const setupGoogleOAuth = ({ server }) => {
 
   server.get('/server/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/server/login' }),
-    (_, res) => {
+    (req, res) => {
+    req.session.giteaAccessToken = req.user.gitea.accessToken.sha1;
 
-    // Successful authentication, redirect home.
     res.redirect(`${process.env.URL_APP}/`);
   });
 }

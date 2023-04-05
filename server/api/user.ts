@@ -59,16 +59,4 @@ router.post('/update-profile', async (req, res, next) => {
   }
 });
 
-router.post('/toggle-theme', async (req: any, res, next) => {
-  try {
-    const { darkTheme } = req.body;
-
-    await User.toggleTheme({ userId: req.user.id, darkTheme });
-
-    res.json({ done: 1 });
-  } catch (err) {
-    next(err);
-  }
-});
-
 export default router;

@@ -133,7 +133,6 @@ class TestClass extends mongoose.Model {
 
   public static async createTest(data, user) {
     console.log('Static method: createTest');
-    console.log(data, user);
 
     const slug = await generateSlug(this, data.name);
 

@@ -103,13 +103,15 @@ class Scheduler {
     }
 
   public async scheduleExamSimple(start: Date, end: Date, jobData: {examId: string}){
+    console.log('Scheduling exam start and end:', start, end, jobData);
+    console.log('Server timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone);
     this.scheduleExamStart(start, jobData)
     this.scheduleExamEnd(end, jobData)
   }
 
   private async scheduleExamStart(start: Date, jobData: {examId: string}){
     // Define the job schedule to run on a specific date and time (in this example, March 20th 2023 at 12:00:00)
-    schedule.scheduleJob(start, function() {
+    const startJob = schedule.scheduleJob({ start, rule: start, tz: 'Europe/Bratislava' }, function() {
       // Find the document you want to update (replace "id_of_exam" with the ID of the exam you want to update)
       Exam.findById(jobData.examId, function(err, exam) {
         if (err) return console.log(err);
@@ -127,11 +129,12 @@ class Scheduler {
         });
       });
     });
+    console.log('Exam start scheduled:', startJob.nextInvocation());
   }
 
   private async scheduleExamEnd(end: Date, jobData: {examId: string}){
     // Define the job schedule to run on a specific date and time (in this example, March 20th 2023 at 12:00:00)
-      schedule.scheduleJob(end, function() {
+      const endJob = schedule.scheduleJob({ start: end, rule: end, tz: 'Europe/Bratislava' }, function() {
         // Find the document you want to update (replace "id_of_exam" with the ID of the exam you want to update)
         Exam.findById(jobData.examId, function(err, exam) {
           if (err) return console.log(err);
@@ -149,6 +152,7 @@ class Scheduler {
           });
         });
       });
+      console.log('Exam start scheduled:', endJob.nextInvocation());
   }
 }
 
