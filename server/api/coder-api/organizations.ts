@@ -49,3 +49,5 @@ router.get('/organizations/change/:id',setSessionTokenHeader, setORGCookie, asyn
 function handleAxiosError(error: AxiosError, res: Response) {
     res.status(error.response?.status ?? 500).json(error.response?.data ?? 'Internal Server Error');
 }
+
+export default router
