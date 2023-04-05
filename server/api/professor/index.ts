@@ -85,10 +85,10 @@ router.post('/create', async (req: any, res, next) => {
     })
 
     // Initialize git repository in projects folder and commit changes
-    const git = simpleGit(testsFolder);
+    const git = simpleGit(testsFolder, { config: [`user.email=${req.user.email}`, `user.name=${req.user.displayName}`] });
     await git.init()
     await git.add('./*')
-    await git.commit('Initial commit', { config: [`user.email=${req.user.email}`, `user.name=${req.user.displayName}`] })
+    await git.commit('Initial commit')
     // Push the changes
     const gitProjRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-test.git`, defaultBranch);
     console.log(gitProjRes, 'Changes committed to GitHub');
