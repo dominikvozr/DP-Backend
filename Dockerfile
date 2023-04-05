@@ -1,13 +1,8 @@
 # Intermediate docker image to build the bundle in and install dependencies
-FROM node:19.2-bullseye-slim as build
+FROM node:19.2-alpine3.15 as build
 
 # Set the working directory to /usr/src/app
 WORKDIR /usr/src/app
-
-# Install Git
-RUN apt-get update && \
-    apt-get install -y git && \
-    apt-get clean
 
 # Copy the package.json and package-lock.json over in the intermediate "build" image
 COPY package*.json ./
@@ -23,17 +18,13 @@ COPY ./ ./
 # RUN npm run build
 
 # Intermediate docker image to build the bundle in and install dependencies
-FROM node:19.2-bullseye-slim as production
+FROM node:19.2-alpine3.15 as production
+RUN apk --no-cache add git
 
 # Set the working directory to /usr/src/app
 WORKDIR /usr/src/app
 
-# Install Git
-RUN apt-get update && \
-    apt-get install -y git && \
-    apt-get clean
-
-# Copy the package.json and package-lock.json over in the intermediate "build" image
+# Copy the package.json and package-lock.json over in the intermedate "build" image
 COPY package*.json ./
 
 # Install the dependencies
@@ -48,4 +39,4 @@ EXPOSE 8080
 
 # Start the application
 # CMD [ "node", "dist/server.js" ]
-CMD [ "npm", "run", "dev"]
+CMD ["npm", "run", "dev"]
