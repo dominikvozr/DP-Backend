@@ -10,13 +10,15 @@ const { exec } = require('child_process');
 
 
 /*
-Body: {projectRepoUrl: string, testsRepoUrl: string, pipelinesRepoUrl: string, test: Test}
+Body: {test: Test}
 */
 router.post('/evaluate', async (req, res) => {
   const randomName = Math.random().toString(36).substring(2, 15);
   const tempDir = path.join(__dirname, randomName);
-  const accessToken = req.body.test.user.gitea.accessToken.sha1
-  const repoName = `${req.body.test.user.gitea.username}/${req.body.test.slug}-test`
+  const accessToken = '865144ab03422e89cca2ee53e842df5034b12283' // req.body.test.user.gitea.accessToken.sha1
+  const profAccessToken = '865144ab03422e89cca2ee53e842df5034b12283' // req.body.test.exam.user.gitea.accessToken.sha1
+  const adminAccessToken = process.env.GITEA_ADMIN_ACCESS_TOKEN
+  const repoName = `xvozard.stuba.sk/qwer-student` // ${req.body.test.user.gitea.username} / ${req.body.test.slug}
 
   try {
     // Clone project repository
@@ -25,16 +27,16 @@ router.post('/evaluate', async (req, res) => {
     await projectRepo.checkoutLocalBranch('test');
 
     // Get tests.java file from the tests repository
-    const testsRepo = await git().clone(req.body.testsRepoUrl, path.join(tempDir, 'tests_repo'));
+    await git().clone(`http://${profAccessToken}@bawix.xyz:81/gitea/${req.body.test.exam.slug}-test.git`, path.join(tempDir, 'tests_repo'));
     const testsFilePath = path.join(tempDir, 'tests_repo', 'tests.java');
     const destinationTestsFilePath = path.join(tempDir, 'tests.java');
     fs.copyFileSync(testsFilePath, destinationTestsFilePath);
 
     // Get Jenkinsfile from the pipelines repository
-    const pipelinesRepo = await git().clone(req.body.pipelinesRepoUrl, path.join(tempDir, 'pipelines_repo'));
+    await git().clone(`${adminAccessToken}@bawix.xyz:81/gitea/gitea_admin/${req.body.test.exam.pipeline.slug}-pipeline.git`, path.join(tempDir, 'pipelines_repo'));
     const pipelinesFilePath = path.join(tempDir, 'pipelines_repo', 'Jenkinsfile');
     const destinationPipelinesFilePath = path.join(tempDir, 'Jenkinsfile');
-    exec(`sed -i "s/\\[TEST_ID_HERE\\]/${req.body.test.id}/g" ${destinationPipelinesFilePath}`, (err, stdout, stderr) => {
+    exec(`sed -i "s/\\[TEST_ID_HERE\\]/${req.body.test.id}/g" ${destinationPipelinesFilePath}`, (err, _stdout, _stderr) => {
         if (err) {
             return res.status(500).send({ message: 'Error updating the Jenkinsfile.' });
         }

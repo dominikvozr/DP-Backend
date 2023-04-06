@@ -31,11 +31,9 @@ const testSchema = new mongoose.Schema({
   },
   startedAt: {
     type: Date,
-    required: true,
   },
   endedAt: {
     type: Date,
-    required: true,
   },
   score: {
     points: Number,
@@ -76,16 +74,7 @@ interface TestModel extends mongoose.Model<TestDocument> {
 
   updateTestResults(testId: string, results: Score): Promise<TestDocument>;
 
-  createTest({
-    userId,
-    examId,
-    testRepo,
-    slug,
-    startedAt,
-    endedAt,
-    score,
-    isOpen,
-  }: {
+  createTest(data: {
     userId: string,
     examId: string,
     testRepo: string,
@@ -109,12 +98,24 @@ class TestClass extends mongoose.Model {
     return exams
   }
 
-  public static async getTestById(id: string, user: any) {
-    const test = await this.findById(id).exec();
-    if(test.userId == user.id)
+  public static async getTestById(id: string, _user: any) {
+    const test = await this.findById(id)
+      .populate({
+        path: 'exam',
+        populate: [
+          {path: 'user'},
+          {path: 'pipeline'}
+        ],
+      })
+      .populate('user')
+      .exec();
+    /* if(test.userId == user.id)
       return test
     else
-      return {status: 'forbidden', isAuthenticated: false}
+      return {status: 'forbidden', isAuthenticated: false} */
+      console.log(test);
+
+      return test
   }
 
   public static async getTestByExamSlug(slug: string, user: any) {
@@ -124,11 +125,12 @@ class TestClass extends mongoose.Model {
   public static async createTest(data, user) {
     console.log('Static method: createTest');
 
-    const slug = await generateSlug(this, data.name);
+    const slug = await generateSlug(this, data.exam.name);
 
     data['user'] = user._id
+    data['exam'] = data.exam._id
     data['slug'] = slug
-    data['createdAt'] = new Date()
+    data['startedAt'] = new Date()
 
     const exam = await this.insertMany([data])
     return exam

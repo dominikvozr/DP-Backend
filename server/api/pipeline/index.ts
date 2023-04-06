@@ -2,7 +2,7 @@
 import axios from 'axios';
 import * as express from 'express';
 import rimraf from 'rimraf';
-import { generateSlug } from 'server/utils/slugify';
+import { generateSlug } from './../../utils/slugify';
 import simpleGit from 'simple-git';
 //import { UserDocument } from 'server/models/User';
 import Pipeline from './../../models/Pipeline';
@@ -20,7 +20,7 @@ interface MulterRequest extends express.Request {
 const storage = multer.diskStorage({
   destination: 'upload/pipelines/',
   filename: (_req, _file, callback) => {
-    callback(null, 'JenkinsFile');
+    callback(null, 'Jenkinsfile');
   },
 });
 const upload = multer({ storage: storage }) // for parsing multipart/form-data
@@ -32,15 +32,15 @@ router.post('/create', async (req: any, res, next) => {
     const slug = await generateSlug(Pipeline, req.body.name);
     const defaultBranch = 'master'
     const pipelinesFolder = `upload/pipelines/${Math.random().toString(36).slice(-8)}`
-    const pipelineFilePath = req.body.pipelinesFile.path;
+    const pipelineFilePath = req.body.file.path;
     const pipelineFile = pipelineFilePath.split('/').pop()
     const accessToken = process.env.GITEA_ADMIN_ACCESS_TOKEN
-    const username = req.user.gitea.username
+    //const username = req.user.gitea.username
 
     // create repository
     const pipelineRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
     {
-      name: `${slug}`,
+      name: `${slug}-pipeline`,
       private: true,
       default_branch: defaultBranch,
     },
@@ -49,6 +49,7 @@ router.post('/create', async (req: any, res, next) => {
         Authorization: `token ${accessToken}`
       }
     });
+    console.log(pipelineRepoResponse);
     if (pipelineRepoResponse.status > 299) {
       throw new Error('Failed to create Repository');
     }
@@ -64,7 +65,7 @@ router.post('/create', async (req: any, res, next) => {
     await git.add('./*')
     await git.commit('Initial commit')
     // Push the changes
-    const gitPipelineRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-pipeline.git`, defaultBranch);
+    const gitPipelineRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/gitea_admin/${slug}-pipeline.git`, defaultBranch);//${username}
     console.log(gitPipelineRes, 'Changes committed to GitHub');
     const rimrafRes = await rimraf(pipelinesFolder);
       if(rimrafRes)
