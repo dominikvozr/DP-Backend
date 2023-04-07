@@ -15,10 +15,10 @@ Body: {test: Test}
 router.post('/evaluate', async (req, res) => {
   const randomName = Math.random().toString(36).substring(2, 15);
   const tempDir = path.join(__dirname, randomName);
-  const accessToken = '865144ab03422e89cca2ee53e842df5034b12283' // req.body.test.user.gitea.accessToken.sha1
-  const profAccessToken = '865144ab03422e89cca2ee53e842df5034b12283' // req.body.test.exam.user.gitea.accessToken.sha1
+  const accessToken = req.body.test.user.gitea.accessToken.sha1
+  const profAccessToken = req.body.test.exam.user.gitea.accessToken.sha1
   const adminAccessToken = process.env.GITEA_ADMIN_ACCESS_TOKEN
-  const repoName = `xvozard.stuba.sk/qwer-student` // ${req.body.test.user.gitea.username} / ${req.body.test.slug}
+  const repoName = `${req.body.test.user.gitea.username}/${req.body.test.slug}-student`
 
   try {
     // Clone project repository
@@ -27,18 +27,19 @@ router.post('/evaluate', async (req, res) => {
     await projectRepo.checkoutLocalBranch('test');
 
     // Get tests.java file from the tests repository
-    await git().clone(`http://${profAccessToken}@bawix.xyz:81/gitea/${req.body.test.exam.slug}-test.git`, path.join(tempDir, 'tests_repo'));
-    const testsFilePath = path.join(tempDir, 'tests_repo', 'tests.java');
-    const destinationTestsFilePath = path.join(tempDir, 'tests.java');
+    await git().clone(`http://${profAccessToken}@bawix.xyz:81/gitea/${req.body.test.exam.user.gitea.username}/${req.body.test.exam.slug}-test.git`, path.join(tempDir, 'tests_repo'));
+    const testsFilePath = path.join(tempDir, 'tests_repo', '1d2l4xdf2hkh.java');
+    const destinationTestsFilePath = path.join(tempDir, '1d2l4xdf2hkh.java');
     fs.copyFileSync(testsFilePath, destinationTestsFilePath);
 
     // Get Jenkinsfile from the pipelines repository
-    await git().clone(`${adminAccessToken}@bawix.xyz:81/gitea/gitea_admin/${req.body.test.exam.pipeline.slug}-pipeline.git`, path.join(tempDir, 'pipelines_repo'));
+    await git().clone(`http://${adminAccessToken}@bawix.xyz:81/gitea/gitea_admin/${req.body.test.exam.pipeline.slug}-pipeline.git`, path.join(tempDir, 'pipelines_repo'));
     const pipelinesFilePath = path.join(tempDir, 'pipelines_repo', 'Jenkinsfile');
     const destinationPipelinesFilePath = path.join(tempDir, 'Jenkinsfile');
-    exec(`sed -i "s/\\[TEST_ID_HERE\\]/${req.body.test.id}/g" ${destinationPipelinesFilePath}`, (err, _stdout, _stderr) => {
+    exec(`sed -i '' "s/\\[TEST_ID_HERE\\]/${req.body.test._id}/g" ${destinationPipelinesFilePath}`, (err, _stdout, _stderr) => {
         if (err) {
-            return res.status(500).send({ message: 'Error updating the Jenkinsfile.' });
+          throw new Error(err);
+          // return res.status(500).send({ message: 'Error updating the Jenkinsfile.' });
         }
     });
     fs.copyFileSync(pipelinesFilePath, destinationPipelinesFilePath);
@@ -46,7 +47,7 @@ router.post('/evaluate', async (req, res) => {
     // Create a new branch, commit, and push changes to Gitea
     await projectRepo.add('./*');
     await projectRepo.commit('Add tests.java and Jenkinsfile');
-    await projectRepo.push('origin', 'test');
+    await projectRepo.push('origin', 'test', ['--force']);
 
     await axios.post(
         `${process.env.JENKINS_URL}/job/StudentSeedJob/buildWithParameters?REPO_NAME=${repoName}&ACCESS_TOKEN=${accessToken}&REPO_URL=${process.env.GITEA_URL}/${repoName}.git`,
@@ -61,7 +62,7 @@ router.post('/evaluate', async (req, res) => {
     console.log(`Successfully triggered Seed Job for ${repoName}`);
 
     // Clean up temporary directories
-    fs.rmdirSync(tempDir, { recursive: true });
+    fs.rmSync(tempDir, { recursive: true });
 
     res.send('Repository prepared successfully');
   } catch (err) {
