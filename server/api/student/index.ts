@@ -78,9 +78,9 @@ router.get('/exam/:slug', async (req, res, next) => {
   }
 })
 
-/* router.get('/update/:id', async (req, res, next) => {
+router.get('/update/results/:id/', async (req, res, next) => {
   try {
-    const result = await Test.updateTest(req.params.id, req.user);
+    const result = await Test.updateTestResults(req.params.id, req.body.results, req.user);
     console.log(result);
     res.json({result: 'success'});
   } catch (err) {
@@ -88,7 +88,7 @@ router.get('/exam/:slug', async (req, res, next) => {
   }
 })
 
-router.get('/delete/:id', async (req, res, next) => {
+/* router.get('/delete/:id', async (req, res, next) => {
   try {
     const result = await Test.deleteTest(req.params.id, req.user);
     console.log(result);

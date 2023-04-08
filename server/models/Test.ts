@@ -5,6 +5,7 @@ import { generateSlug } from '../utils/slugify';
 //import Exam from './Exam';
 
 interface Score {
+    tests: [],
     points: number,
     message: string,
     percentage: number,
@@ -36,6 +37,7 @@ const testSchema = new mongoose.Schema({
     type: Date,
   },
   score: {
+    tests: Array,
     points: Number,
     message: String,
     percentage: Number,
@@ -54,6 +56,7 @@ interface TestDocument extends mongoose.Document {
   startedAt: Date,
   endedAt: Date,
   score: {
+    tests: [],
     points: number,
     message: string,
     percentage: number,
@@ -68,11 +71,15 @@ interface TestModel extends mongoose.Model<TestDocument> {
 
   getTests(user: any): Promise<TestDocument[]>;
 
+  getTestsByExam(examId: string, user: any): Promise<TestDocument[]>;
+
   getTestById(id: string, user: any): Promise<TestDocument>;
 
   getTestByExamSlug(id: string, user: any): Promise<TestDocument>;
 
-  updateTestResults(testId: string, results: Score): Promise<TestDocument>;
+  updateTestResults(testId: string, results: Score, user: any): Promise<TestDocument>;
+
+  setTestResults(testId: string, results: Score): Promise<TestDocument>;
 
   createTest(data: {
     userId: string,
@@ -118,6 +125,11 @@ class TestClass extends mongoose.Model {
       return test
   }
 
+  public static async getTestsByExam(examId: string, user: any) {
+    const test = await this.find({exam: examId, user: user._id}).populate('user');
+    return test
+  }
+
   public static async getTestByExamSlug(slug: string, user: any) {
     return await this.find({examSlug: slug, userId: user.id});
   }
@@ -133,13 +145,30 @@ class TestClass extends mongoose.Model {
     data['startedAt'] = new Date()
 
     const exam = await this.insertMany([data])
+    /* Test.findByIdAndUpdate(
+      data.exam._id,
+      { $push: { tests: data.exam._id } },
+      { new: true, useFindAndModify: false },
+      (err, updatedExam) => {
+        if (err) return console.error(err);
+        console.log('Updated Exam:', updatedExam);
+      }
+    ); */
     return exam
   }
 
-  public static async updateTestResults(testId, results: Score) {
+  public static async updateTestResults(testId, results: Score, user: any) {
+    const test = await this.findById(testId).populate('user');
+    if (test.user._id !== user._id) return 'forbidden'
+    const modifier = { score: results };
+    return this.findByIdAndUpdate(testId, { $set: modifier }, { new: true, runValidators: true })
+      .setOptions({ lean: true });
+  }
+
+  public static async setTestResults(testId, results: Score) {
     const test = await this.findById(testId);
     const dbResults = createResults(test, results)
-    const modifier = { results: dbResults };
+    const modifier = { score: dbResults };
     return this.findByIdAndUpdate(testId, { $set: modifier }, { new: true, runValidators: true })
       .setOptions({ lean: true });
   }
@@ -150,21 +179,27 @@ function createResults(test: any, testResults) {
   const testArr = test.exam.tests
   let points = 0;
 
-  testResults.forEach((result) => {
-    if (result.result) {
-      const test = testArr.find((test) => test.test_function_name === result.test_function_name + '()');
-      if (test) {
-        points += test.points;
-      }
+  testResults.map((result, index) => {
+    if (!result.result){
+      testResults[index].value = 0
+      return
     }
-    return {
-        points,
-        message: JSON.stringify(testResults),
-        percentage: points / test.exam.points * 100,
-        mark: '',
-        time: new Date(),
-    }
+
+    const test = testArr.find((test) => test.name === result.name + '()');
+    if (!test)
+      throw new Error(`Unable to find test name: '${result.name}' while evaluating`)
+
+      points += test.points;
+      testResults[index].value = test.points
   });
+  return {
+      tests: testResults,
+      points,
+      message: JSON.stringify(testResults),
+      percentage: points / test.exam.points * 100,
+      mark: '',
+      time: new Date(),
+  }
 }
 
 testSchema.loadClass(TestClass);

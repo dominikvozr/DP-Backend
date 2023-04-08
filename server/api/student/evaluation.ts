@@ -73,7 +73,7 @@ router.post('/evaluate', async (req, res) => {
 
 // API endpoint for handling test results
 router.post('/results', (req, res) => {
-    Test.updateTestResults(req.body.testId, req.body.results)
+    Test.setTestResults(req.body.testId, req.body.results)
     console.log('Test Results:', req.body.results);
 
     // Send a response

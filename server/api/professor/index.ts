@@ -2,6 +2,7 @@ import axios from 'axios';
 import * as express from 'express';
 import { generateSlug } from '../../utils/slugify';
 import Exam from './../../models/Exam';
+import Test from './../../models/Test';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -135,8 +136,10 @@ router.get('/index', async (req: IndexRequest, res, next) => {
 
 router.get('/show/:id', async (req, res, next) => {
   try {
+    console.log(req.params.id);
     const exam = await Exam.getExam(req.params.id, req.user);
-    res.json({isAuthorized: req.user ? true : false, user: req.user || null, exam});
+    const tests = await Test.getTestsByExam(req.params.id, req.user);
+    res.json({isAuthorized: req.user ? true : false, user: req.user || null, exam, tests});
   } catch (err) {
     next(err);
   }
