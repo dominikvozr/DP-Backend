@@ -3,12 +3,13 @@ import axios from 'axios';
 export async function createOrUpdateGiteaUser(email, name) {
   const giteaApiUrl = `${process.env.GITEA_URL}/api/v1`;
   const giteaAdminAccessToken = process.env.GITEA_ADMIN_ACCESS_TOKEN;
+  const username = email.replace('@', '.')
 
   try {
     // Search for the user in Gitea
     const searchResponse = await axios.get(`${giteaApiUrl}/users/search`, {
       headers: { Authorization: `token ${giteaAdminAccessToken}` },
-      params: { q: name },
+      params: { q: username },
     });
 
     // If the user exists, return the user and their token
@@ -19,8 +20,6 @@ export async function createOrUpdateGiteaUser(email, name) {
   } catch (error) {
     console.error('Error searching for Gitea user:', error);
   }
-
-  const username = email.replace('@', '.')
   const password = Math.random().toString(36).slice(-8)
 
   // If the user doesn't exist, create a new user in Gitea
