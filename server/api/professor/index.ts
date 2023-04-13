@@ -2,6 +2,7 @@ import axios from 'axios';
 import * as express from 'express';
 import { generateSlug } from '../../utils/slugify';
 import Exam from './../../models/Exam';
+import Test from './../../models/Test';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -29,7 +30,7 @@ const storage = multer.diskStorage({
   filename: (_req, file, callback) => {
     const originalName = file.originalname;
     const extension = originalName.substring(originalName.lastIndexOf('.'));
-    const randomName = Math.random().toString(36).substring(2, 15);
+    const randomName = 'tests';
     callback(null, randomName + extension);
   },
 });
@@ -92,7 +93,7 @@ router.post('/create', async (req: any, res, next) => {
     // Push the changes
     const gitProjRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-test.git`, defaultBranch);
     console.log(gitProjRes, 'Changes committed to GitHub');
-    const rimrafRes = await rimraf(projectsFolder);
+    const rimrafRes = await rimraf(testsFolder);
       if(rimrafRes)
         console.log('Projects folder cleaned up');
 
@@ -110,7 +111,7 @@ router.post('/create', async (req: any, res, next) => {
         await git.commit('Initial commit')
         const gitExamRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-exam.git`, defaultBranch);
         console.log(gitExamRes, 'Changes committed to GitHub');
-        const rimrafRes = await rimraf(testsFolder);
+        const rimrafRes = await rimraf(projectsFolder);
         if(rimrafRes)
           console.log('Projects folder cleaned up');
 
@@ -135,8 +136,10 @@ router.get('/index', async (req: IndexRequest, res, next) => {
 
 router.get('/show/:id', async (req, res, next) => {
   try {
+    console.log(req.params.id);
     const exam = await Exam.getExam(req.params.id, req.user);
-    res.json({isAuthorized: req.user ? true : false, user: req.user || null, exam});
+    const tests = await Test.getTestsByExam(req.params.id, req.user);
+    res.json({isAuthorized: req.user ? true : false, user: req.user || null, exam, tests});
   } catch (err) {
     next(err);
   }

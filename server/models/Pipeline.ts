@@ -1,6 +1,5 @@
 // import * as _ from 'lodash';
 import * as mongoose from 'mongoose';
-import { generateSlug } from '../utils/slugify';
 
 const pipelineSchema = new mongoose.Schema({
   name: {
@@ -50,8 +49,6 @@ interface PipelineDocument extends mongoose.Document {
 }
 
 interface PipelineModel extends mongoose.Model<PipelineDocument> {
-  //getUserBySlug({ slug }: { slug: string }): Promise<PipelineDocument>;
-
   getPipelinesByUser({ userId }: { userId: string }): Promise<PipelineDocument[]>;
 
   getPipelines(): Promise<PipelineDocument[]>;
@@ -74,16 +71,7 @@ interface PipelineModel extends mongoose.Model<PipelineDocument> {
     type: string,
   }): Promise<PipelineDocument[]>;
 
-  createPipeline({
-    name,
-    userId,
-    description,
-    file,
-    slug,
-    createdAt,
-    language,
-    type,
-  }: {
+  createPipeline(data: {
     name: string,
     userId: string,
     description: string,
@@ -92,7 +80,7 @@ interface PipelineModel extends mongoose.Model<PipelineDocument> {
     createdAt: Date,
     language: string,
     type: string,
-  }, user: Express.User): Promise<PipelineDocument[]>;
+  }, user: Express.User, slug: string): Promise<PipelineDocument[]>;
 }
 
 class PipelineClass extends mongoose.Model {
@@ -102,10 +90,8 @@ class PipelineClass extends mongoose.Model {
     return this.findOne({ slug }, 'name userId description file slug createdAt language type').setOptions({ lean: true });
   }
 
-  public static async createPipeline(data, user) {
+  public static async createPipeline(data, user, slug) {
     console.log('Static method: createPipeline');
-
-    const slug = await generateSlug(this, data.name);
 
     data['user'] = user._id
     data['slug'] = slug

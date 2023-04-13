@@ -93,8 +93,6 @@ interface ExamDocument extends mongoose.Document {
 }
 
 interface ExamModel extends mongoose.Model<ExamDocument> {
-  //getUserBySlug({ slug }: { slug: string }): Promise<ExamDocument>;
-
   getExamsByUser({ userId }: { userId: string }): Promise<ExamDocument[]>;
 
   getExams(user: any, page: number): Promise<ExamDocument[]>;
@@ -164,7 +162,7 @@ class ExamClass extends mongoose.Model {
       .populate('user')
       .exec();
 
-    if(exam.userId.id == user.id)
+    if(exam.user._id == user.id)
       return exam
     else
       return {status: 'forbidden', isAuthenticated: false}
@@ -195,8 +193,6 @@ class ExamClass extends mongoose.Model {
     data.endDate.replace(' ', 'T')
     data.endDate = new Date(data.endDate)
 
-    //const exam = await this.insertMany([data])
-
     const exam = new Exam(data);
     exam.save((err, savedExam) => {
       if (err) throw err;
@@ -207,23 +203,6 @@ class ExamClass extends mongoose.Model {
     });
 
     return exam // exam[0]
-  }
-
-  public static async updateProfile({ userId, name, avatarUrl }) {
-    console.log('Static method: updateProfile');
-
-    const user = await this.findById(userId, 'slug displayName');
-
-    const modifier = { displayName: user.displayName, avatarUrl, slug: user.slug };
-
-    if (name !== user.displayName) {
-      modifier.displayName = name;
-     // modifier.slug = await generateSlug(this, name);
-    }
-
-    return this.findByIdAndUpdate(userId, { $set: modifier }, { new: true, runValidators: true })
-      .select('displayName avatarUrl slug')
-      .setOptions({ lean: true });
   }
 }
 

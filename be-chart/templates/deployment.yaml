@@ -112,6 +112,26 @@ spec:
                 secretKeyRef:
                   name: be-secrets
                   key: SESSION_SECRET
+            - name: BE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: be-token
+                  key: BE_TOKEN
+            - name: JENKINS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: jenkins-url
+                  key: JENKINS_URL
+            - name: JENKINS_SC_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: jenkins-token
+                  key: name
+            - name: JENKINS_SC_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: jenkins-token
+                  key: JENKINS_SC_TOKEN
             - name: MONGO_SERVICE
               value: "mongodb.default.svc.cluster.local"
             - name: BASE_PATH
