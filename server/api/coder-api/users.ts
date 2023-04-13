@@ -72,6 +72,8 @@ router.get('/users/:id/organization',setSessionTokenHeader, async (req: Request,
     try {
         const response =
             await axios.get(`${API_BASE_URL}/users/${req.params.id}/organizations`);
+        ORG = response.data[0].id; // ORG is needed for creating workspace
+        res.cookie('ORG', ORG);
         res.json(response.data);
     } catch (error) {
         handleAxiosError(error, res);
