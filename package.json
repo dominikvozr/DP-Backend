@@ -29,6 +29,7 @@
         "express": "^4.18.2",
         "express-request-id": "^3.0.0",
         "express-session": "^1.17.3",
+        "generate-password": "^1.7.0",
         "graceful": "^1.1.0",
         "lodash": "^4.17.21",
         "mongodb": "^4.13.0",

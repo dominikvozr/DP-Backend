@@ -35,6 +35,7 @@ const UserSchema = new mongoose.Schema({
   avatarUrl: String,
   darkTheme: Boolean,
   gitea: Object,
+  sessionPass: String
 });
 
 export interface UserDocument extends mongoose.Document {
@@ -48,6 +49,7 @@ export interface UserDocument extends mongoose.Document {
   googleToken: { accessToken: string; refreshToken: string };
   isSignedupViaGoogle: boolean;
   gitea: object,
+  sessionPass: string
 }
 
 interface UserModel extends mongoose.Model<UserDocument> {
@@ -62,6 +64,13 @@ interface UserModel extends mongoose.Model<UserDocument> {
     name: string;
     avatarUrl: string;
   }): Promise<UserDocument[]>;
+
+  updatePass({userId,newPass}:
+  {
+    userId: string;
+    newPass: string;
+  }): Promise<UserDocument>;
+
 
   publicFields(): string[];
 
@@ -114,8 +123,17 @@ class UserClass extends mongoose.Model {
       .setOptions({ lean: true });
   }
 
+  public static async updatePass({ userId, newPass}){
+    console.log('Static method: updatePass');
+    const user = await this.findById(userId);
+    user.sessionPass = newPass;
+    await user.save();
+
+    return user;
+  }
+
   public static publicFields(): string[] {
-    return ['_id', 'id', 'displayName', 'email', 'avatarUrl', 'slug', 'isSignedupViaGoogle', 'gitea'];
+    return ['_id', 'id', 'displayName', 'email', 'avatarUrl', 'slug', 'isSignedupViaGoogle', 'gitea', 'sessionPass'];
   }
 
   public static async signInOrSignUpViaGoogle({
