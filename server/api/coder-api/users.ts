@@ -8,7 +8,7 @@ const generator = require('generate-password');
 
 
 // URL to our Coder Server
-const API_BASE_URL = 'http://bawix.xyz:81/api/v2';
+const API_BASE_URL = process.env.API_BASE_URL;
 // Initialize session token
 let SESSION_TOKEN = 'session_token';
 // Initialize user
@@ -94,24 +94,33 @@ router.get('/users/:id/roles',setSessionTokenHeader, async (req: Request, res: R
 });
 
 // Route to login user
-router.post('/users/login',setSessionTokenCookie,setSessionTokenHeader,setUserCookie,setORGCookie,
+router.post('/users/login',setSessionTokenCookie,setUserCookie,setORGCookie,
     async (req: Request, res: Response) => {
     try {
         const user = req.user.valueOf()
+        let pass = user['sessionPass']
+
+        if(req.body.password){
+            pass = req.body.password
+        }
         const data = {
             email: user['email'],
-            password: user['sessionPass']
+            password: pass
         }
         const responseLogin = await axios.post(`${API_BASE_URL}/users/login`, JSON.stringify(data));
-        SESSION_TOKEN = responseLogin.data.session_token; // Update session token
-        res.cookie('coder_session_token', SESSION_TOKEN);
 
-        const responseUser = await axios.get(`${API_BASE_URL}/users/me`);
+        SESSION_TOKEN = responseLogin.data.session_token; // Update session token
+
+        const responseUser = await axios.get(`${API_BASE_URL}/users/me`, {
+            headers: {
+            'Coder-Session-Token': SESSION_TOKEN
+            }
+        });
 
         UUID = responseUser.data.id; // User ID for unique calls
-        res.cookie('UUID', UUID);
         ORG = responseUser.data.organization_ids[0]; // ORG is needed for creating workspace
-        res.cookie('ORG', ORG);
+
+        await User.updateCoderData({userId:user['id'],organizationId:ORG,coderId:UUID,coderSessionToken:SESSION_TOKEN})
         res.json(responseUser.data);
     } catch (error) {
         handleAxiosError(error, res);
@@ -177,6 +186,14 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
 
         const creatorToken = creatorResponse.data.session_token;
 
+        const creatorInfo = await axios.get(`${API_BASE_URL}/users/me`,
+            {
+                headers: {
+                    'Coder-Session-Token': creatorToken
+                }
+            });
+        const orgId = creatorInfo.data.organization_ids[0];
+
         const newUser = req.user.valueOf()
         const newPass = generator.generate({
                 length: 10,
@@ -185,12 +202,12 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
 
         const newUserBody = {
             email: newUser['email'],
-            organization_id: req.cookies['ORG'],
+            organization_id:orgId,
             password: newPass,
             username: newUser['displayName']
         }
 
-        await User.updatePass(newPass)
+        await User.updatePass({userId:newUser['id'],newPass:newPass})
 
         const responseCreate = await axios.post(`${API_BASE_URL}/users`,  JSON.stringify(newUserBody),
             {
@@ -200,17 +217,15 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
         });
 
         UUID = responseCreate.data.id; // User ID for unique calls
-        res.cookie('UUID', UUID);
         ORG = responseCreate.data.organization_ids[0]; // ORG is needed for creating workspace
-        res.cookie('ORG', ORG);
-
         const loginBody = {
             email: responseCreate.data.email,
             password: newPass
         }
         const responseLogin = await axios.post(`${API_BASE_URL}/users`,  JSON.stringify(loginBody))
+
         SESSION_TOKEN = responseLogin.data.session_token;
-        res.cookie('coder_session_token', SESSION_TOKEN);
+        await User.updateCoderData({userId:newUser['id'],organizationId:ORG,coderId:UUID,coderSessionToken:SESSION_TOKEN})
 
         res.json(responseCreate.data);
     } catch (error) {

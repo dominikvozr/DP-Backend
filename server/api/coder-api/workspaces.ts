@@ -12,8 +12,9 @@ axios.defaults.headers.common['Content-Type'] = 'application/json';
 // Route to create a new workspace
 router.post('/', setSessionTokenHeader, async (req: Request, res: Response) => {
     try {
-        const ORG = req.cookies['ORG'];
-        const UUID = req.cookies['UUID'];
+        const user = req.user.valueOf();
+        const ORG = user['organizationId'];
+        const UUID = user['coderId'];
         API_BASE_URL = `http://bawix.xyz:81/api/v2/organizations/${ORG}/members/${UUID}`;
         const response = await axios.post(`${API_BASE_URL}/workspaces`, req.body);
         res.json(response.data);
