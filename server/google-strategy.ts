@@ -60,7 +60,7 @@ const setupGoogleOAuth = ({ server }) => {
   server.use(passport.initialize());
   server.use(passport.session());
 
-  server.get('/auth/google', (req, res, next) => {
+  server.get('/server/auth/google', (req, res, next) => {
     const options = {
       scope: ['profile', 'email'],
       prompt: 'select_account',
@@ -69,7 +69,7 @@ const setupGoogleOAuth = ({ server }) => {
     passport.authenticate('google', options)(req, res, next);
   });
 
-  server.get('/auth/google/callback',
+  server.get('/server/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/login' }),
     (req, res) => {
     req.session.giteaAccessToken = req.user.gitea.accessToken.sha1;

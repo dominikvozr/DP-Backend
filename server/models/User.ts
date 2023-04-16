@@ -57,9 +57,9 @@ export interface UserDocument extends mongoose.Document {
   isSignedupViaGoogle: boolean;
   gitea: object,
   sessionPass: string,
-  organizationId: String,
-  coderId: String,
-  coderSessionToken: String,
+  organizationId: string,
+  coderId: string,
+  coderSessionToken: string,
 }
 
 interface UserModel extends mongoose.Model<UserDocument> {
