@@ -100,12 +100,12 @@ export default class Gitea {
       await git().clone(`http://${token}@bawix.xyz:81/gitea/gitea_admin/${repo}.git`, pipelinePath);
       const pipelinesFilePath = path.join(pipelinePath, 'Jenkinsfile');
       const destinationPipelinesFilePath = path.join(destinationDir, 'Jenkinsfile');
-      exec(`sed -i '' "s/\\[TEST_ID_HERE\\]/${testId}/g" ${destinationPipelinesFilePath}`, (err) => {
+      exec(`sed -i '' "s/\\[TEST_ID_HERE\\]/${testId}/g" ${pipelinesFilePath}`, (err) => {
           if (err) {
             throw new Error(err);
           }
       });
-      exec(`sed -i '' "s/\\[REPO_NAME_HERE\\]/${studentRepo}/g" ${destinationPipelinesFilePath}`, (err) => {
+      exec(`sed -i '' "s/\\[REPO_NAME_HERE\\]/${studentRepo}/g" ${pipelinesFilePath}`, (err) => {
           if (err) {
             throw new Error(err);
           }
