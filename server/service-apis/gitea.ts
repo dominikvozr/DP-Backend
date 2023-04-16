@@ -103,16 +103,8 @@ export default class Gitea {
       const pipelinesFilePath = path.join(pipelinePath, 'Jenkinsfile');
       const destinationPipelinesFilePath = path.join(destinationDir, 'Jenkinsfile');
       await fs.copyFileSync(pipelinesFilePath, destinationPipelinesFilePath);
-      await exec(`sed -i '' "s/\\[TEST_ID_HERE\\]/${testId}/g" ${destinationPipelinesFilePath}`, (err) => {
-          if (err) {
-            throw new Error(err);
-          }
-      });
-      await exec(`sed -i '' "s/\\[REPO_NAME_HERE\\]/${studentRepo}/g" ${destinationPipelinesFilePath}`, (err) => {
-          if (err) {
-            throw new Error(err);
-          }
-      });
+      await exec(`sed -i '' "s/\\[TEST_ID_HERE\\]/${testId}/g" ${destinationPipelinesFilePath}`);
+      await exec(`sed -i '' "s/\\[REPO_NAME_HERE\\]/${studentRepo}/g" ${destinationPipelinesFilePath}`);
     } catch (err) {
       return err.response
     }
