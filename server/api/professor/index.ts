@@ -1,18 +1,18 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import axios from 'axios';
 import * as express from 'express';
 import { generateSlug } from '../../utils/slugify';
 import Exam from './../../models/Exam';
 import Test from './../../models/Test';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+import Gitea from './../../service-apis/gitea';
+const path = require('path');
+const fs = require('fs-extra');
 const multer = require('multer')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const unzipper = require('unzipper');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const simpleGit = require('simple-git');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const rimraf = require('rimraf');
+const readline = require('readline');
+//const { Readable } = require('stream');
 
 
 // MulterRequest to prevent errors
@@ -30,7 +30,7 @@ const storage = multer.diskStorage({
   filename: (_req, file, callback) => {
     const originalName = file.originalname;
     const extension = originalName.substring(originalName.lastIndexOf('.'));
-    const randomName = 'tests';
+    const randomName = Math.random().toString(36).slice(-8);
     callback(null, randomName + extension);
   },
 });
@@ -41,11 +41,11 @@ router.post('/create', async (req: any, res, next) => {
   try {
     const slug = await generateSlug(Exam, req.body.name);
     const defaultBranch = 'master'
-    const projectsFolder = `upload/projects/${Math.random().toString(36).slice(-8)}`
+    const projectsFolder = path.join(__dirname, 'upload', 'projects', Math.random().toString(36).slice(-8))
     const testsFolder = `upload/tests/${Math.random().toString(36).slice(-8)}`
     const zipFilePath = req.body.project.path;
     const testFilePath = req.body.testsFile.path;
-    const testFile = testFilePath.split('/').pop()
+    const extension = testFilePath.split('/').pop().split('.')[1]
     const accessToken = req.user.gitea.accessToken.sha1
     const username = req.user.gitea.username
 
@@ -81,7 +81,7 @@ router.post('/create', async (req: any, res, next) => {
     }
 
     fs.mkdirSync(testsFolder, { recursive: true })
-    fs.rename(testFilePath, `${testsFolder}/${testFile}`, function (err) {
+    fs.rename(testFilePath, `${testsFolder}/tests${extension}`, function (err) {
       if (err) throw err
     })
 
@@ -90,9 +90,7 @@ router.post('/create', async (req: any, res, next) => {
     await git.init()
     await git.add('./*')
     await git.commit('Initial commit')
-    // Push the changes
-    const gitProjRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-test.git`, defaultBranch);
-    console.log(gitProjRes, 'Changes committed to GitHub');
+    await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-test.git`, defaultBranch);
     const rimrafRes = await rimraf(testsFolder);
       if(rimrafRes)
         console.log('Projects folder cleaned up');
@@ -101,24 +99,65 @@ router.post('/create', async (req: any, res, next) => {
       .pipe(unzipper.Extract({ path: projectsFolder }))
       .on('finish', async () => {
         console.log('Zip file extracted successfully');
-
-        // Initialize git repository in projects folder and commit changes
-        const git = simpleGit(projectsFolder, { config: [`user.email=${req.user.email}`, `user.name=${req.user.displayName}`] });
-        if (!fs.existsSync(`${projectsFolder}/.git`))
-          await git.init()
-
-        await git.add('./*')
-        await git.commit('Initial commit')
-        const gitExamRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-exam.git`, defaultBranch);
-        console.log(gitExamRes, 'Changes committed to GitHub');
-        const rimrafRes = await rimraf(projectsFolder);
-        if(rimrafRes)
-          console.log('Projects folder cleaned up');
-
+        try {
+          const git = await Gitea.reinitializeRepo(projectsFolder, req.user.email, req.user.displayName)
+          await git.add(['-f', '.'])
+          await git.commit('Initial commit')
+          await git.addRemote('newRemote', `http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-exam.git`);
+          await git.push(['--all', '--force', 'newRemote']);
+          await git.pushTags('newRemote');
+          console.log('Git repository reinitialized')
+        } catch (error) {
+          console.error('Error reinitializing Git repository:', error)
+        }
       });
 
     const exam = await Exam.createExam(req.body, req.user, slug);
     res.json({exam, message: 'success'});
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/upload/project', upload.single('project'), async (req: any, res) => {
+      res.json(req.file)
+});
+
+router.post('/upload/tests', upload.single('tests'), (req: MulterRequest, res, next) => {
+  try {
+    const file = req.file;
+    const regex = /@Test/i;
+    const javaRegexFunc = /void\s+(\w+)\s*\(/;
+    /* const pythonRegexFunc = /@pytest\.mark\.parametrize\(['"](.*)['"]/gm;
+    const jsRegexFunc = /@Test\s+void\s+(\w+)\s*\(/gm;
+    const cRegexFunc = /void\s+(\w+)\s*\(/gm;
+    const cppRegexFunc = /void\s+(\w+)::test\s*\(/gm; */
+    const matches = [];
+    let getNextLine = false;
+    let id = 1;
+
+    const rl = readline.createInterface({
+      input: fs.createReadStream(file.path),
+      crlfDelay: Infinity,
+    });
+
+    rl.on('line', (line) => {
+
+      const match = regex.exec(line);
+      const m = javaRegexFunc.exec(line) //|| pythonRegexFunc.exec(line) || jsRegexFunc.exec(line) || cRegexFunc.exec(line) || cppRegexFunc.exec(line);
+
+      if (getNextLine && m){
+        const testName = m[1];
+        matches.push({ id, name: `${testName}()` });
+        id++;
+      }
+      if (match)
+        getNextLine = true;
+    });
+
+    rl.on('close', () => {
+      res.json({ file, matches });
+    });
   } catch (err) {
     next(err);
   }
@@ -163,39 +202,5 @@ router.get('/delete/:id', async (req, res, next) => {
     next(err);
   }
 })
-
-router.post('/upload/project', upload.single('project'), (req: MulterRequest, res) => {
-  res.json(req.file)
-});
-
-router.post('/upload/tests', upload.single('tests'), (req: MulterRequest, res, next) => {
-  try {
-    const file = req.file
-    fs.readFile(file.path, 'utf-8', (err, data) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error reading file tests file');
-      return;
-    }
-
-    const regex = /@Test\s+public void\s+(\w+)\((.*?)\)/g;
-    const matches = [];
-
-    let match;
-    let id = 1;
-    while (match = regex.exec(data)) {
-      const testName = match[1];
-      const testParams = match[2];
-      matches.push({ id, name: `${testName}(${testParams})`, points: 0 });
-      id++;
-    }
-
-    res.json({file, matches});
-  });
-    //const exam = await Exam.createExam(req.body, req.user);
-  } catch (err) {
-    next(err);
-  }
-});
 
 export default router;

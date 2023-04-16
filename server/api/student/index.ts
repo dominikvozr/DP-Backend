@@ -1,49 +1,44 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import axios from 'axios';
 import * as express from 'express';
 import rimraf from 'rimraf';
 import Exam from './../../models/Exam';
-//import { UserDocument } from 'server/models/User';
 import Test from './../../models/Test';
-const git = require('simple-git');
+import User from './../../models/User';
+import Gitea from '../../service-apis/gitea';
+import { generateSlug } from './../../utils/slugify';
+const path = require('path');
 const router = express.Router();
 
+
+/* REQUEST BODY
+{
+  "user": {"_id": "642a801b4dfb0003a1ed1fa9"},
+  "exam": {"_id": "64370e273441f6e96ab0869e"},
+}
+*/
 router.post('/create', async (req: any, res, next) => {
+  // create repository
+  const user: any = await User.findById(req.body.user._id)
+  const exam: any = await Exam.findById(req.body.exam._id).populate('user')
+  const slug = await generateSlug(Test, exam.slug);
+  const accessToken = user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
+  const examRepoName = `${exam.user.gitea.username}/${exam.slug}-exam` // ${req.body.exam.user.gitea.username}
+  const studentRepoName = `${user.gitea.username}/${slug}-student` // ${req.exam.user.gitea.username}
+  const studentAccessToken = user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
+  const response = await Gitea.createRepo(`${slug}-student`, studentAccessToken)
+  // repository already exists
+  if (response.status === 409) {}
   try {
-    // create repository
-    const accessToken = req.body.user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
-    const repoName = `${req.body.exam.user.gitea.username}/${req.body.examSlug}-exam` // ${req.body.exam.user.gitea.username}
-    const studentRepoName = `${req.user.gitea.username}/${req.body.examSlug}-student` // ${req.exam.user.gitea.username}
-    const studentAccessToken = req.user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
-    const examRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
-    {
-      name: `${req.body.examSlug}-student`,
-      private: true,
-      default_branch: "master",
-    },
-    {
-      headers: {
-        Authorization: `token ${studentAccessToken}`
-      }
-    });
-    if (examRepoResponse.status > 299) {
-      throw new Error('Failed to create Repository');
-    }
-
-    const tempDir = Math.random().toString(36).substring(2, 15);
-    const clone = await git().clone(`http://${accessToken}@bawix.xyz:81/gitea/${repoName}.git`, tempDir);
-    console.log(clone);
-
-    const projectRepo = await git(tempDir, { config: ['user.email=studentcode@studentcode.sk', 'user.name=studentcode'] });
-    await projectRepo.add('./*')
-    await projectRepo.commit('Initial commit')
-    const gitExamRes = await projectRepo.push(`http://${studentAccessToken}@bawix.xyz:81/gitea/${studentRepoName}.git`, 'master');
-    console.log(gitExamRes, 'Changes committed to GitHub');
-    const rimrafRes = await rimraf(tempDir);
-    if(rimrafRes)
-      console.log('Projects folder cleaned up');
-
-    const test = await Test.createTest(req.body, req.body.user);
+    // create temp dir for repo
+    const tempDir = path.join(__dirname, Math.random().toString(36).substring(2, 15))
+    // clone professor repo into tempDir
+    await Gitea.cloneRepoIntoDir(examRepoName, accessToken, tempDir)
+    // commit and push repo to students repo
+    await Gitea.commitPushRepo(studentRepoName, studentAccessToken, tempDir, 'master')
+    // delete projectb
+    await rimraf(tempDir);
+    // create test
+    const test = await Test.createTest(exam, user, slug);
     res.json({test, message: 'success'});
   } catch (err) {
     next(err);
