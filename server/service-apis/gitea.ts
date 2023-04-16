@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import axios from "axios";
+import util from 'util';
+import child_process from 'child_process';
 const fs = require('fs-extra');
 const path = require('path');
 const git = require('simple-git');
-const { exec } = require('child_process');
+const exec = util.promisify(child_process.exec);
 
 export default class Gitea {
 
