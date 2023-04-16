@@ -22,6 +22,11 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     sparse: true,
   },
+  coderId:  {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
   googleToken: {
     accessToken: String,
     refreshToken: String,
@@ -35,6 +40,9 @@ const UserSchema = new mongoose.Schema({
   avatarUrl: String,
   darkTheme: Boolean,
   gitea: Object,
+  sessionPass: String,
+  organizationId: String,
+  coderSessionToken: String,
 });
 
 export interface UserDocument extends mongoose.Document {
@@ -48,6 +56,10 @@ export interface UserDocument extends mongoose.Document {
   googleToken: { accessToken: string; refreshToken: string };
   isSignedupViaGoogle: boolean;
   gitea: object,
+  sessionPass: string,
+  organizationId: String,
+  coderId: String,
+  coderSessionToken: String,
 }
 
 interface UserModel extends mongoose.Model<UserDocument> {
@@ -62,6 +74,20 @@ interface UserModel extends mongoose.Model<UserDocument> {
     name: string;
     avatarUrl: string;
   }): Promise<UserDocument[]>;
+
+  updatePass({userId,newPass}:
+  {
+    userId: string;
+    newPass: string;
+  }): Promise<UserDocument>;
+
+  updateCoderData({userId,organizationId,coderId,coderSessionToken}:
+  {
+    userId: string;
+    organizationId: string;
+    coderId: string;
+    coderSessionToken: string;
+  }): Promise<UserDocument>;
 
   publicFields(): string[];
 
@@ -114,8 +140,28 @@ class UserClass extends mongoose.Model {
       .setOptions({ lean: true });
   }
 
+  public static async updatePass({ userId, newPass}){
+    console.log('Static method: updatePass');
+    const user = await this.findById(userId);
+    user.sessionPass = newPass;
+    await user.save();
+
+    return user;
+  }
+
+  public static async updateCoderData({userId,organizationId,coderId,coderSessionToken}){
+    console.log('Static method: updateCoder');
+    const user = await this.findById(userId);
+    user.organizationId = organizationId;
+    user.coderSessionToken =coderSessionToken;
+    user.coderId = coderId
+    await user.save();
+
+    return user;
+  }
+
   public static publicFields(): string[] {
-    return ['_id', 'id', 'displayName', 'email', 'avatarUrl', 'slug', 'isSignedupViaGoogle', 'gitea'];
+    return ['_id', 'id', 'displayName', 'email', 'avatarUrl', 'slug', 'isSignedupViaGoogle', 'gitea', 'sessionPass', 'coderId', 'organizationId', 'coderSessionToken'];
   }
 
   public static async signInOrSignUpViaGoogle({
