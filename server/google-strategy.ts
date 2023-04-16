@@ -70,7 +70,7 @@ const setupGoogleOAuth = ({ server }) => {
   });
 
   server.get('/server/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login' }),
+    passport.authenticate('google', { failureRedirect: '/server/login' }),
     (req, res) => {
     req.session.giteaAccessToken = req.user.gitea.accessToken.sha1;
 
