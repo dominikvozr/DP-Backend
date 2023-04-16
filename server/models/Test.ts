@@ -1,7 +1,8 @@
 // import * as _ from 'lodash';
 import * as mongoose from 'mongoose';
 //import async from 'async'
-import { generateSlug } from '../utils/slugify';
+import Exam from './Exam';
+import { isEmpty } from 'lodash';
 //import Exam from './Exam';
 
 interface Score {
@@ -35,6 +36,11 @@ const testSchema = new mongoose.Schema({
   },
   endedAt: {
     type: Date,
+  },
+  slug: {
+    type: String,
+    required: true,
+    unique: true,
   },
   score: {
     tests: Array,
@@ -75,22 +81,17 @@ interface TestModel extends mongoose.Model<TestDocument> {
 
   getTestById(id: string, user: any): Promise<TestDocument>;
 
+  getAdminTestById(id: string): Promise<TestDocument>;
+
   getTestByExamSlug(id: string, user: any): Promise<TestDocument>;
 
   updateTestResults(testId: string, results: Score, user: any): Promise<TestDocument>;
 
   setTestResults(testId: string, results: Score): Promise<TestDocument>;
 
-  createTest(data: {
-    userId: string,
-    examId: string,
-    testRepo: string,
-    slug: string,
-    startedAt: Date,
-    endedAt: Date,
-    score: Array<object>,
-    isOpen: boolean,
-  }, user: Express.User): Promise<TestDocument>;
+  createTest(exam: typeof Exam, user: Express.User, slug: string): Promise<TestDocument>;
+
+  checkIfExist(exam: typeof Exam, user: Express.User): Promise<TestDocument>;
 
   deleteTest({
     id
@@ -125,6 +126,20 @@ class TestClass extends mongoose.Model {
       return test
   }
 
+  public static async getAdminTestById(id: string) {
+    const test = await this.findById(id)
+      .populate({
+        path: 'exam',
+        populate: [
+          {path: 'user'},
+          {path: 'pipeline'}
+        ],
+      })
+      .populate('user')
+      .exec();
+      return test
+  }
+
   public static async getTestsByExam(examId: string, user: any) {
     const test = await this.find({exam: examId, user: user._id}).populate('user');
     return test
@@ -134,27 +149,36 @@ class TestClass extends mongoose.Model {
     return await this.find({examSlug: slug, userId: user.id});
   }
 
-  public static async createTest(data, user) {
+  public static async checkIfExists(exam, user) {
+    console.log('Checking if test with same id exist in user');
+    const resp = await this.find({user: user._id, exam: exam._id})
+    console.log(resp);
+    if(!isEmpty(resp)) return true
+    return false
+  }
+
+  public static async createTest(exam, user, slug) {
     console.log('Static method: createTest');
-
-    const slug = await generateSlug(this, data.exam.name);
-
-    data['user'] = user._id
-    data['exam'] = data.exam._id
-    data['slug'] = slug
-    data['startedAt'] = new Date()
-
-    const exam = await this.insertMany([data])
-    /* Test.findByIdAndUpdate(
-      data.exam._id,
-      { $push: { tests: data.exam._id } },
-      { new: true, useFindAndModify: false },
-      (err, updatedExam) => {
-        if (err) return console.error(err);
-        console.log('Updated Exam:', updatedExam);
-      }
-    ); */
-    return exam
+    // TODO uncomment code below in production
+    /* const checked = await this.checkIfExists(exam, user)
+    if (checked) {
+      console.error('test already exists');
+      throw Error('test already exists')
+    } */
+    const data = {
+      user: user._id,
+      exam: exam._id,
+      examSlug: exam.slug,
+      testRepo: `${user.gitea.username}/${slug}-student`,
+      slug: slug,
+      startedAt: new Date(),
+      isOpen: true,
+    }
+    const test = new Test(data)
+    test.save(function(err) {
+      if (err) console.log(err);
+    });
+    return test
   }
 
   public static async updateTestResults(testId, results: Score, user: any) {
@@ -165,8 +189,8 @@ class TestClass extends mongoose.Model {
       .setOptions({ lean: true });
   }
 
-  public static async setTestResults(testId, results: Score) {
-    const test = await this.findById(testId);
+  public static async setTestResults(testId: string, results: Score) {
+    const test = await this.getTestById(testId, null);
     const dbResults = createResults(test, results)
     const modifier = { score: dbResults };
     return this.findByIdAndUpdate(testId, { $set: modifier }, { new: true, runValidators: true })
@@ -185,7 +209,7 @@ function createResults(test: any, testResults) {
       return
     }
 
-    const test = testArr.find((test) => test.name === result.name + '()');
+    const test = testArr[index];
     if (!test)
       throw new Error(`Unable to find test name: '${result.name}' while evaluating`)
 
