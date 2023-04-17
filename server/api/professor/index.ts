@@ -81,7 +81,7 @@ router.post('/create', async (req: any, res, next) => {
     }
 
     fs.mkdirSync(testsFolder, { recursive: true })
-    fs.rename(testFilePath, `${testsFolder}/tests${extension}`, function (err) {
+    fs.rename(testFilePath, `${testsFolder}/tests.${extension}`, function (err) {
       if (err) throw err
     })
 
