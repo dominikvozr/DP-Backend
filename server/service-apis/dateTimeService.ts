@@ -10,6 +10,8 @@ export default class DateTimeService {
   ): Promise<Date> => {
     // Get timezone based on IP address
     const timezone = await this.getTimezoneByIp(ipAddress);
+    console.log(dateString);
+    console.log(timeString);
 
     // Combine date and time strings
     const dateTimeString = `${dateString} ${timeString}`;
