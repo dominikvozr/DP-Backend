@@ -6,27 +6,21 @@ export default class DateTimeService {
   public static createDateObject = async (
     dateString: string,
     timeString: string,
-    ipAddress: string
+    _ipAddress: string
   ): Promise<Date> => {
     // Get timezone based on IP address
-    const timezone = await this.getTimezoneByIp(ipAddress);
-    console.log(dateString);
-    console.log(timeString);
+    //BUG: const timezone = await this.getTimezoneByIp(ipAddress);
 
     // Combine date and time strings
     const dateTimeString = `${dateString} ${timeString}`;
-    console.log(dateTimeString);
 
     // Parse date and time string and set timezone
     const date = DateTime.fromFormat(dateTimeString, 'dd/MM/yyyy hh:mm', {
-      zone: timezone,
+      zone: 'Europe/Bratislava',
     });
-    console.log(date);
-
 
     // Convert to JavaScript Date object
     const jsDate = date.toJSDate();
-    console.log(date);
 
     return jsDate;
   };
