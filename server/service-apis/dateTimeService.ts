@@ -1,10 +1,13 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { DateTime } = require('luxon');
-const geoip = require('geoip-lite');
-const request = require('request-promise');
+import { DateTime } from 'luxon';
+import geoip from 'geoip-lite';
+import request from 'request-promise';
 
 export default class DateTimeService {
-  public static createDateObject = async (dateString, timeString, ipAddress) => {
+  public static createDateObject = async (
+    dateString: string,
+    timeString: string,
+    ipAddress: string
+  ): Promise<Date> => {
     // Get timezone based on IP address
     const timezone = await this.getTimezoneByIp(ipAddress);
 
@@ -12,15 +15,17 @@ export default class DateTimeService {
     const dateTimeString = `${dateString} ${timeString}`;
 
     // Parse date and time string and set timezone
-    const date = DateTime.fromFormat(dateTimeString, 'dd/MM/yyyy hh:mm', { zone: timezone });
+    const date = DateTime.fromFormat(dateTimeString, 'dd/MM/yyyy hh:mm', {
+      zone: timezone,
+    });
 
     // Convert to JavaScript Date object
     const jsDate = date.toJSDate();
 
     return jsDate;
-  }
+  };
 
-  public static getTimezoneByIp = async (ipAddress) => {
+  public static getTimezoneByIp = async (ipAddress: string): Promise<string> => {
     const location = geoip.lookup(ipAddress);
 
     if (!location) {
@@ -36,5 +41,5 @@ export default class DateTimeService {
     }
 
     return data.timezone;
-  }
+  };
 }
