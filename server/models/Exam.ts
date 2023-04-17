@@ -184,15 +184,21 @@ class ExamClass extends mongoose.Model {
 
   public static async createExam(data, user, slug, ip) {
 
+    console.log(data);
+    console.log(user);
+    console.log(slug);
+    console.log(ip);
+
     data['user'] = user._id
     data['slug'] = slug
     data['createdAt'] = new Date()
     data['isOpen'] = false
 
-    data.startDate.replace(' ', 'T')
+    /* data.startDate.replace(' ', 'T')
     data.startDate = `${data.startDate} ${data.startTime}`
     data.endDate.replace(' ', 'T')
-    data.endDate = new Date(data.endDate)
+    data.endDate = new Date(data.endDate) */
+
 
     try {
       data.startDate = await DateTimeService.createDateObject(data.startDate, data.startTime, ip)
@@ -200,10 +206,14 @@ class ExamClass extends mongoose.Model {
     } catch (error) {
       console.error('Error:', error.message);
     }
+    console.log(data);
 
     const exam = new Exam(data);
     exam.save((err, savedExam) => {
-      if (err) throw err;
+      if (err) {
+        console.log(err);
+        throw err;
+      }
       // schedule the job to close the exam
       Scheduler.getInstance().scheduleExamSimple(savedExam.startDate, savedExam.endDate, {
         examId: savedExam._id,
