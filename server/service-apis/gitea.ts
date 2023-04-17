@@ -102,11 +102,33 @@ export default class Gitea {
       await git().clone(`http://${token}@bawix.xyz:81/gitea/gitea_admin/${repo}.git`, pipelinePath);
       const pipelinesFilePath = path.join(pipelinePath, 'Jenkinsfile');
       const destinationPipelinesFilePath = path.join(destinationDir, 'Jenkinsfile');
-      await fs.copyFileSync(pipelinesFilePath, destinationPipelinesFilePath);
-      await exec(`sed -i '' "s/\\[TEST_ID_HERE\\]/${testId}/g" ${destinationPipelinesFilePath}`);
-      await exec(`sed -i '' "s/\\[REPO_NAME_HERE\\]/${studentRepo}/g" ${destinationPipelinesFilePath}`);
+      fs.copyFileSync(pipelinesFilePath, destinationPipelinesFilePath);
+      /* await exec(`sed -i '' "s/\\[TEST_ID_HERE\\]/${testId}/g" ${destinationPipelinesFilePath}`);
+      await exec(`sed -i '' "s/\\[REPO_NAME_HERE\\]/${studentRepo}/g" ${destinationPipelinesFilePath}`); */
+      try {
+        await exec(sedCommand('\\[TEST_ID_HERE\\]', testId, destinationPipelinesFilePath));
+      } catch (error) {
+        console.error('Error in updating TEST_ID_HERE:', error);
+        throw error;
+      }
+
+      try {
+        await exec(sedCommand('\\[REPO_NAME_HERE\\]', studentRepo, destinationPipelinesFilePath));
+      } catch (error) {
+        console.error('Error in updating REPO_NAME_HERE:', error);
+        throw error;
+      }
     } catch (err) {
+      console.error('Error in preparePipeline:', err);
       return err.response
     }
   }
 }
+
+function sedCommand(searchPattern, replacement, filePath) {
+    const platform = process.platform;
+    const isMac = platform === 'darwin';
+    const sedFlag = isMac ? "-i ''" : '-i';
+
+    return `sed ${sedFlag} "s/${searchPattern}/${replacement}/g" ${filePath}`;
+  };
