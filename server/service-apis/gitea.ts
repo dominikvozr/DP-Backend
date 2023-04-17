@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import axios from "axios";
-import util from 'util';
-import child_process from 'child_process';
+import * as util from 'util';
+import * as child_process from 'child_process';
 const fs = require('fs-extra');
 const path = require('path');
 const git = require('simple-git');
