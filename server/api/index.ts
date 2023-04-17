@@ -20,12 +20,15 @@ function handleError(err, _, res, __) {
 }
 
 const isAuthenticated = (req, res, next) => {
+  console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+
   if (req.user === null || req.user === undefined)
     res.json({isAuthorized: false, user: {}})
   else next()
 }
 // Authorization middleware
 const tokenAuthorize = (req, res, next) => {
+  console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('token ')) {
         return res.status(401).send({ message: 'Unauthorized: Missing or invalid token.' });
