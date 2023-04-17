@@ -1,6 +1,7 @@
 // import * as _ from 'lodash';
 import * as mongoose from 'mongoose';
 import Scheduler from './../scheduler/scheduler';
+import DateTimeService from './../service-apis/dateTimeService';
 
 const examSchema = new mongoose.Schema({
   name: {
@@ -135,7 +136,7 @@ interface ExamModel extends mongoose.Model<ExamDocument> {
     tests: Array<object>,
   }): Promise<ExamDocument[]>;
 
-  createExam(data: ExamDocument, user: Express.User, slug: string): Promise<ExamDocument[]>;
+  createExam(data: ExamDocument, user: Express.User, slug: string, ip: string): Promise<ExamDocument[]>;
 }
 
 class ExamClass extends mongoose.Model {
@@ -181,7 +182,7 @@ class ExamClass extends mongoose.Model {
       return {status: 'forbidden', isAuthenticated: false}
   }
 
-  public static async createExam(data, user, slug) {
+  public static async createExam(data, user, slug, ip) {
 
     data['user'] = user._id
     data['slug'] = slug
@@ -189,9 +190,16 @@ class ExamClass extends mongoose.Model {
     data['isOpen'] = false
 
     data.startDate.replace(' ', 'T')
-    data.startDate = new Date(data.startDate)
+    data.startDate = `${data.startDate} ${data.startTime}`
     data.endDate.replace(' ', 'T')
     data.endDate = new Date(data.endDate)
+
+    try {
+      data.startDate = await DateTimeService.createDateObject(data.startDate, data.startTime, ip)
+      data.endDate = await DateTimeService.createDateObject(data.endDate, data.endTime, ip)
+    } catch (error) {
+      console.error('Error:', error.message);
+    }
 
     const exam = new Exam(data);
     exam.save((err, savedExam) => {

@@ -112,7 +112,7 @@ router.post('/create', async (req: any, res, next) => {
         }
       });
 
-    const exam = await Exam.createExam(req.body, req.user, slug);
+    const exam = await Exam.createExam(req.body, req.user, slug, req.ip);
     res.json({exam, message: 'success'});
   } catch (err) {
     next(err);
