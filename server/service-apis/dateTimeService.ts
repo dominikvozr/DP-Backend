@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import geoip from 'geoip-lite';
+import * as geoip from 'geoip-lite';
 import request from 'request-promise';
 
 export default class DateTimeService {
