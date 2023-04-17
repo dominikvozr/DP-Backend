@@ -68,6 +68,7 @@ server.use(
   }),
 );
 
+server.set('trust proxy', true);
 
 
 // Session settings
