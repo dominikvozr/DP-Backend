@@ -111,8 +111,8 @@ router.post('/create', async (req: any, res, next) => {
           console.error('Error reinitializing Git repository:', error)
         }
       });
-
-    const exam = await Exam.createExam(req.body, req.user, slug, req.ip);
+    const ipAddress = req.header('x-forwarded-for') || req.ip;
+    const exam = await Exam.createExam(req.body, req.user, slug, ipAddress);
     res.json({exam, message: 'success'});
   } catch (err) {
     next(err);

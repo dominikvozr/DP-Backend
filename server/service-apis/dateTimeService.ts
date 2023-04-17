@@ -15,14 +15,18 @@ export default class DateTimeService {
 
     // Combine date and time strings
     const dateTimeString = `${dateString} ${timeString}`;
+    console.log(dateTimeString);
 
     // Parse date and time string and set timezone
     const date = DateTime.fromFormat(dateTimeString, 'dd/MM/yyyy hh:mm', {
       zone: timezone,
     });
+    console.log(date);
+
 
     // Convert to JavaScript Date object
     const jsDate = date.toJSDate();
+    console.log(date);
 
     return jsDate;
   };
