@@ -15,8 +15,13 @@ router.post('/', setSessionTokenHeader, async (req: Request, res: Response) => {
         const user = req.user.valueOf();
         const ORG = user['organizationId'];
         const UUID = user['coderId'];
+        const sessionToken = user['coderSessionToken']
         API_BASE_URL = `http://bawix.xyz:81/api/v2/organizations/${ORG}/members/${UUID}`;
-        const response = await axios.post(`${API_BASE_URL}/workspaces`, req.body);
+        const response = await axios.post(`${API_BASE_URL}/workspaces`, req.body,{
+            headers: {
+                'Coder-Session-Token': sessionToken
+            }
+        });
         res.json(response.data);
     } catch (error) {
         handleAxiosError(error, res);
@@ -45,18 +50,21 @@ router.put('/:id/extend', setSessionTokenHeader, async (req: Request, res: Respo
 });
 
 // Route to redirect to workspace link
-router.post('/:workspace/session',setSessionTokenHeader, async (req: Request, res: Response) => {
+router.get('/:workspace/session',setSessionTokenHeader, async (req: Request, res: Response) => {
     try {
         const user = req.user.valueOf();
         const email = user['email'];
-        const password= user['sessionPass'];
         const name = user['displayName'];
+        const password= user['sessionPass'];
+
         API_BASE_URL = `http://bawix.xyz:81/@${name}/${req.params.workspace}.main/apps/code-server`
-        res.send(`<p>email: ${email}</p>
-                        <p>heslo: ${password}</p>
-                        <script>window.open("${API_BASE_URL}/?folder=/home/coder","_blank");</script>
-                        <a href="${API_BASE_URL}/?folder=/home/coder" target="_blank">
-                        Click here to access your workspace! </a>`);
+        const workspace = "${API_BASE_URL}/?folder=/home/coder"
+        const response= {
+            email:email,
+            password:password,
+            workspaceLink: workspace
+        }
+        res.json(JSON.stringify(response));
     } catch (error) {
         handleAxiosError(error, res);
     }
