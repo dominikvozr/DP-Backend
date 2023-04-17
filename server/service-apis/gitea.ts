@@ -130,6 +130,9 @@ function sedCommand(searchPattern, replacement, filePath) {
     const isMac = platform === 'darwin';
     const sedFlag = isMac ? "-i ''" : '-i';
 
+    // Convert the replacement to a string
+    replacement = replacement.toString();
+
     // Escape forward slashes in the replacement string for Linux systems
     if (!isMac) {
       replacement = replacement.replace(/\//g, '\\/');
