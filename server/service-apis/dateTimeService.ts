@@ -15,9 +15,7 @@ export default class DateTimeService {
     const dateTimeString = `${dateString} ${timeString}`;
 
     // Parse date and time string and set timezone
-    const date = DateTime.fromFormat(dateTimeString, 'dd/MM/yyyy hh:mm', {
-      zone: 'Europe/Bratislava',
-    });
+    const date = DateTime.fromFormat(dateTimeString, 'dd/MM/yyyy hh:mm').setZone('Europe/Bratislava', {keepCalendarTime: true})
 
     // Convert to JavaScript Date object
     const jsDate = date.toJSDate();
