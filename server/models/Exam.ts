@@ -184,11 +184,6 @@ class ExamClass extends mongoose.Model {
 
   public static async createExam(data, user, slug, ip) {
 
-    console.log(data);
-    console.log(user);
-    console.log(slug);
-    console.log(ip);
-
     data['user'] = user._id
     data['slug'] = slug
     data['createdAt'] = new Date()
@@ -206,8 +201,6 @@ class ExamClass extends mongoose.Model {
     } catch (error) {
       console.error('Error:', error.message);
     }
-    console.log(data);
-
     const exam = new Exam(data);
     exam.save((err, savedExam) => {
       if (err) {
