@@ -192,7 +192,7 @@ class TestClass extends mongoose.Model {
   public static async setTestResults(testId: string, results: Score) {
     const test = await this.getTestById(testId, null);
     const dbResults = createResults(test, results)
-    const modifier = { score: dbResults };
+    const modifier = { score: dbResults, isOpen: false };
     return this.findByIdAndUpdate(testId, { $set: modifier }, { new: true, runValidators: true })
       .setOptions({ lean: true });
   }

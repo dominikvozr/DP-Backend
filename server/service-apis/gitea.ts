@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import axios from "axios";
+import * as util from 'util';
+import * as child_process from 'child_process';
 const fs = require('fs-extra');
 const path = require('path');
 const git = require('simple-git');
-const { exec } = require('child_process');
+const exec = util.promisify(child_process.exec);
 
 export default class Gitea {
 
@@ -100,19 +102,41 @@ export default class Gitea {
       await git().clone(`http://${token}@bawix.xyz:81/gitea/gitea_admin/${repo}.git`, pipelinePath);
       const pipelinesFilePath = path.join(pipelinePath, 'Jenkinsfile');
       const destinationPipelinesFilePath = path.join(destinationDir, 'Jenkinsfile');
-      exec(`sed -i '' "s/\\[TEST_ID_HERE\\]/${testId}/g" ${destinationPipelinesFilePath}`, (err) => {
-          if (err) {
-            throw new Error(err);
-          }
-      });
-      exec(`sed -i '' "s/\\[REPO_NAME_HERE\\]/${studentRepo}/g" ${destinationPipelinesFilePath}`, (err) => {
-          if (err) {
-            throw new Error(err);
-          }
-      });
       fs.copyFileSync(pipelinesFilePath, destinationPipelinesFilePath);
+      /* await exec(`sed -i '' "s/\\[TEST_ID_HERE\\]/${testId}/g" ${destinationPipelinesFilePath}`);
+      await exec(`sed -i '' "s/\\[REPO_NAME_HERE\\]/${studentRepo}/g" ${destinationPipelinesFilePath}`); */
+      try {
+        await exec(sedCommand('\\[TEST_ID_HERE\\]', testId, destinationPipelinesFilePath));
+      } catch (error) {
+        console.error('Error in updating TEST_ID_HERE:', error);
+        throw error;
+      }
+
+      try {
+        await exec(sedCommand('\\[REPO_NAME_HERE\\]', studentRepo, destinationPipelinesFilePath));
+      } catch (error) {
+        console.error('Error in updating REPO_NAME_HERE:', error);
+        throw error;
+      }
     } catch (err) {
+      console.error('Error in preparePipeline:', err);
       return err.response
     }
   }
 }
+
+function sedCommand(searchPattern, replacement, filePath) {
+    const platform = process.platform;
+    const isMac = platform === 'darwin';
+    const sedFlag = isMac ? "-i ''" : '-i';
+
+    // Convert the replacement to a string
+    replacement = replacement.toString();
+
+    // Escape forward slashes in the replacement string for Linux systems
+    if (!isMac) {
+      replacement = replacement.replace(/\//g, '\\/');
+    }
+
+    return `sed ${sedFlag} "s/${searchPattern}/${replacement}/g" ${filePath}`;
+};
