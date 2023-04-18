@@ -24,13 +24,15 @@ export default class Gitea {
       return examRepoResponse
     } catch (err) {
       try {
-        await axios.delete(`${process.env.GITEA_URL}/api/v1/repos/${username}/${repo}`,
+        const repos = await axios.delete(`${process.env.GITEA_URL}/api/v1/repos/${username}/${repo}`,
         {
           headers: {
             Authorization: `token ${process.env.GITEA_ADMIN_ACCESS_TOKEN}`
           }
         });
-        this.createRepo(username, repo, token)
+        console.log('repos: ' + repos);
+
+        await this.createRepo(username, repo, token)
       } catch (error) {
         console.error(error);
         console.error(err)
