@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import axios from 'axios';
 import * as express from 'express';
 import { generateSlug } from '../../utils/slugify';
 import Exam from './../../models/Exam';
