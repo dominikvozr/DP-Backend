@@ -11,6 +11,7 @@ const unzipper = require('unzipper');
 const simpleGit = require('simple-git');
 const rimraf = require('rimraf');
 const readline = require('readline');
+const { exec } = require('child_process');
 //const { Readable } = require('stream');
 
 
@@ -51,35 +52,6 @@ router.post('/create', async (req: any, res, next) => {
     // create repository
     await Gitea.createRepo(username, `${slug}-exam`, req.user.gitea.accessToken.sha1)
     await Gitea.createRepo(username, `${slug}-test`, req.user.gitea.accessToken.sha1)
-    /* const examRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
-    {
-      name: `${slug}-exam`,
-      private: true,
-      default_branch: defaultBranch,
-    },
-    {
-      headers: {
-        Authorization: `token ${req.user.gitea.accessToken.sha1}`
-      }
-    });
-    if (examRepoResponse.status > 299) {
-      throw new Error('Failed to create Repository');
-    }
-
-    const testRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
-    {
-      name: `${slug}-test`,
-      private: true,
-      default_branch: defaultBranch,
-    },
-    {
-      headers: {
-        Authorization: `token ${req.user.gitea.accessToken.sha1}`
-      }
-    });
-    if (testRepoResponse.status > 299) {
-      throw new Error('Failed to create Repository');
-    } */
 
     fs.mkdirSync(testsFolder, { recursive: true })
     fs.rename(testFilePath, `${testsFolder}/tests.${extension}`, function (err) {
@@ -94,11 +66,19 @@ router.post('/create', async (req: any, res, next) => {
     await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-test.git`, defaultBranch);
     const rimrafRes = await rimraf(testsFolder);
       if(rimrafRes)
-        console.log('Projects folder cleaned up');
+        console.log('Tests folder cleaned up');
 
     fs.createReadStream(zipFilePath)
       .pipe(unzipper.Extract({ path: projectsFolder }))
       .on('finish', async () => {
+        exec('ls -la ' + projectsFolder, (error, stdout, stderr) => {
+          if (error) {
+            console.error(`exec error: ${error}`);
+            return res.status(500).send({ message: 'An error occurred while executing the command.' });
+          }
+          // Send the command output as the response
+          res.send(`<pre>${stdout}</pre>`);
+        });
         console.log('Zip file extracted successfully');
         try {
           await Gitea.commitPushRepo(`${username}/${slug}-exam`, accessToken, projectsFolder, req.user.email, req.user.displayName)

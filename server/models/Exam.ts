@@ -189,12 +189,6 @@ class ExamClass extends mongoose.Model {
     data['createdAt'] = new Date()
     data['isOpen'] = false
 
-    /* data.startDate.replace(' ', 'T')
-    data.startDate = `${data.startDate} ${data.startTime}`
-    data.endDate.replace(' ', 'T')
-    data.endDate = new Date(data.endDate) */
-
-
     try {
       data.startDate = await DateTimeService.createDateObject(data.startDate, data.startTime, data.timezone)
       data.endDate = await DateTimeService.createDateObject(data.endDate, data.endTime, data.timezone)
