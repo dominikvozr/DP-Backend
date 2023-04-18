@@ -75,8 +75,7 @@ router.post('/create', async (req: any, res, next) => {
           if (error) {
             console.error(`exec error: ${error}`);
           }
-          // Send the command output as the response
-          res.send(`<pre>${stdout}</pre>`);
+          console.log('stdout: ' + stdout);
         });
         console.log('Zip file extracted successfully');
         try {
