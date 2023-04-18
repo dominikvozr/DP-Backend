@@ -10,9 +10,11 @@ const Cabin = require('cabin');
 const { Signale } = require('signale');
 const MongoStore = require('connect-mongo')(session);
 const bodyParser = require('body-parser')
+const requestIp = require('request-ip');
 
 import { setupGoogleOAuth } from "./google-strategy";
 import apiRouter from './api';
+import { timezoneMiddleware } from './middlewares/timezoneMiddleware';
 // helm upgrade studentcode-be-helm-chart helm-chart -f values.yaml
 // eslint-disable-next-line
 require('dotenv').config();
@@ -69,6 +71,8 @@ server.use(
 );
 
 server.set('trust proxy', true);
+server.use(requestIp.mw());
+server.use(timezoneMiddleware);
 
 
 // Session settings

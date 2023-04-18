@@ -21,7 +21,7 @@ function handleError(err, _, res, __) {
 
 const isAuthenticated = (req, res, next) => {
   console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
-  console.log(req.clientIp);
+  console.log(req.timezone);
 
   if (req.user === null || req.user === undefined)
     res.json({isAuthorized: false, user: {}})
@@ -30,7 +30,7 @@ const isAuthenticated = (req, res, next) => {
 // Authorization middleware
 const tokenAuthorize = (req, res, next) => {
   console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
-  console.log(req.clientIp);
+  console.log(req.timezone);
 
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('token ')) {
