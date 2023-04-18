@@ -105,11 +105,12 @@ router.post('/create', async (req: any, res, next) => {
         } catch (error) {
           console.error('Error reinitializing Git repository:', error)
         }
+
+        console.log('X-Forwarded-For:', req.header('x-forwarded-for'));
+        const ipAddress = req.header('x-forwarded-for') || req.ip;
+        const exam = await Exam.createExam(req.body, req.user, slug, ipAddress);
+        res.json({exam, message: 'success'});
       });
-    console.log('X-Forwarded-For:', req.header('x-forwarded-for'));
-    const ipAddress = req.header('x-forwarded-for') || req.ip;
-    const exam = await Exam.createExam(req.body, req.user, slug, ipAddress);
-    res.json({exam, message: 'success'});
   } catch (err) {
     next(err);
   }
