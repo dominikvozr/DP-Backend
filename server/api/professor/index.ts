@@ -100,12 +100,7 @@ router.post('/create', async (req: any, res, next) => {
       .on('finish', async () => {
         console.log('Zip file extracted successfully');
         try {
-          const git = await Gitea.reinitializeRepo(projectsFolder, req.user.email, req.user.displayName)
-          await git.add(['-f', '.'])
-          await git.commit('Initial commit')
-          await git.addRemote('newRemote', `http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-exam.git`);
-          await git.push(['--all', '--force', 'newRemote']);
-          await git.pushTags('newRemote');
+          await Gitea.commitPushRepo(`${username}/${slug}-exam`, accessToken, projectsFolder, req.user.email, req.user.displayName)
           console.log('Git repository reinitialized')
         } catch (error) {
           console.error('Error reinitializing Git repository:', error)

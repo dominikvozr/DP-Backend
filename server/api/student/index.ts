@@ -34,7 +34,7 @@ router.post('/create', async (req: any, res, next) => {
     // clone professor repo into tempDir
     await Gitea.cloneRepoIntoDir(examRepoName, accessToken, tempDir)
     // commit and push repo to students repo
-    await Gitea.commitPushRepo(studentRepoName, studentAccessToken, tempDir, 'master')
+    await Gitea.commitPushRepo(studentRepoName, studentAccessToken, tempDir, 'studentcode@studentcode.com', 'StudentCODE')
     // delete projectb
     await rimraf(tempDir);
     // create test

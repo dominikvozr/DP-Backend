@@ -36,9 +36,9 @@ export default class Gitea {
     }
   }
 
-  public static commitPushRepo = async (repo: string, token: string, dir: string, _branch: string) => {
+  public static commitPushRepo = async (repo: string, token: string, dir: string, email: string, displayName: string) => {
     try {
-      const git = await this.reinitializeRepo(dir, 'studentcode@studentcode.sk', 'studentcode')
+      const git = await this.reinitializeRepo(dir, email, displayName)
       // const projectRepo = await git(dir, { config: ['user.email=studentcode@studentcode.sk', 'user.name=studentcode'] });
       await git.add(['-f', '.'])
       await git.commit('Initial commit')
