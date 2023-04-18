@@ -9,7 +9,7 @@ const exec = util.promisify(child_process.exec);
 
 export default class Gitea {
 
-  public static createRepo = async (repo: string, token: string) => {
+  public static createRepo = async (username: string, repo: string, token: string) => {
     try {
       const examRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`, {
         name: repo,
@@ -23,7 +23,21 @@ export default class Gitea {
       });
       return examRepoResponse
     } catch (err) {
-      return err.response
+      try {
+        const repos = await axios.delete(`${process.env.GITEA_URL}/api/v1/repos/${username}/${repo}`,
+        {
+          headers: {
+            Authorization: `token ${process.env.GITEA_ADMIN_ACCESS_TOKEN}`
+          }
+        });
+        console.log('repos: ' + JSON.stringify(repos));
+        await this.createRepo(username, repo, token)
+        console.log('repo deleted');
+      } catch (error) {
+        console.error(error);
+        console.error(err)
+        return err.response
+      }
     }
   }
 
@@ -36,9 +50,9 @@ export default class Gitea {
     }
   }
 
-  public static commitPushRepo = async (repo: string, token: string, dir: string, _branch: string) => {
+  public static commitPushRepo = async (repo: string, token: string, dir: string, email: string, displayName: string) => {
     try {
-      const git = await this.reinitializeRepo(dir, 'studentcode@studentcode.sk', 'studentcode')
+      const git = await this.reinitializeRepo(dir, email, displayName)
       // const projectRepo = await git(dir, { config: ['user.email=studentcode@studentcode.sk', 'user.name=studentcode'] });
       await git.add(['-f', '.'])
       await git.commit('Initial commit')

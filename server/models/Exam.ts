@@ -1,6 +1,7 @@
 // import * as _ from 'lodash';
 import * as mongoose from 'mongoose';
 import Scheduler from './../scheduler/scheduler';
+import DateTimeService from './../service-apis/dateTimeService';
 
 const examSchema = new mongoose.Schema({
   name: {
@@ -188,21 +189,28 @@ class ExamClass extends mongoose.Model {
     data['createdAt'] = new Date()
     data['isOpen'] = false
 
-    data.startDate.replace(' ', 'T')
-    data.startDate = new Date(data.startDate)
-    data.endDate.replace(' ', 'T')
-    data.endDate = new Date(data.endDate)
+    try {
+      data.startDate = await DateTimeService.createDateObject(data.startDate, data.startTime, data.timezone)
+      data.endDate = await DateTimeService.createDateObject(data.endDate, data.endTime, data.timezone)
+    } catch (error) {
+      console.error('Error:', error.message);
+    }
+    console.log(data.startDate);
+    console.log(data.endDate);
 
     const exam = new Exam(data);
     exam.save((err, savedExam) => {
-      if (err) throw err;
+      if (err) {
+        console.log(err);
+        throw err;
+      }
       // schedule the job to close the exam
       Scheduler.getInstance().scheduleExamSimple(savedExam.startDate, savedExam.endDate, {
         examId: savedExam._id,
       });
+      return exam // exam[0]
     });
 
-    return exam // exam[0]
   }
 }
 

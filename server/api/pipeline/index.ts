@@ -1,15 +1,12 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import axios from 'axios';
 import * as express from 'express';
 import rimraf from 'rimraf';
 import { generateSlug } from './../../utils/slugify';
-import simpleGit from 'simple-git';
-//import { UserDocument } from 'server/models/User';
 import Pipeline from './../../models/Pipeline';
+import Gitea from './../../service-apis/gitea';
 const multer = require('multer')
 const fs = require('fs');
-
-
+const path = require('path');
 
 // MulterRequest to prevent errors
 interface MulterRequest extends express.Request {
@@ -30,29 +27,14 @@ const router = express.Router();
 router.post('/create', async (req: any, res, next) => {
   try {
     const slug = await generateSlug(Pipeline, req.body.name);
-    const defaultBranch = 'master'
-    const pipelinesFolder = `upload/pipelines/${Math.random().toString(36).slice(-8)}`
+    const pipelinesFolder = path.join(__dirname, 'upload', 'pipelines', `${Math.random().toString(36).slice(-8)}`)
     const pipelineFilePath = req.body.file.path;
     const pipelineFile = pipelineFilePath.split('/').pop()
     const accessToken = process.env.GITEA_ADMIN_ACCESS_TOKEN
     //const username = req.user.gitea.username
 
     // create repository
-    const pipelineRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
-    {
-      name: `${slug}-pipeline`,
-      private: true,
-      default_branch: defaultBranch,
-    },
-    {
-      headers: {
-        Authorization: `token ${accessToken}`
-      }
-    });
-    console.log(pipelineRepoResponse);
-    if (pipelineRepoResponse.status > 299) {
-      throw new Error('Failed to create Repository');
-    }
+    await Gitea.createRepo('gitea_admin', `${slug}-pipeline`, accessToken)
 
     fs.mkdirSync(pipelinesFolder, { recursive: true })
     fs.rename(pipelineFilePath, `${pipelinesFolder}/${pipelineFile}`, function (err) {
@@ -60,13 +42,13 @@ router.post('/create', async (req: any, res, next) => {
     })
 
     // Initialize git repository in projects folder and commit changes
-    const git = simpleGit(pipelinesFolder, { config: [`user.email=${req.user.email}`, `user.name=${req.user.displayName}`] });
-    await git.init()
-    await git.add('./*')
-    await git.commit('Initial commit')
-    // Push the changes
-    const gitPipelineRes = await git.push(`http://${accessToken}@bawix.xyz:81/gitea/gitea_admin/${slug}-pipeline.git`, defaultBranch);//${username}
-    console.log(gitPipelineRes, 'Changes committed to GitHub');
+    try {
+      await Gitea.commitPushRepo(`gitea_admin/${slug}-pipeline`, accessToken, pipelinesFolder, req.user.email, req.user.displayName)
+      console.log('Git repository reinitialized')
+    } catch (error) {
+      console.error('Error reinitializing Git repository:', error)
+    }
+
     const rimrafRes = await rimraf(pipelinesFolder);
       if(rimrafRes)
         console.log('Projects folder cleaned up');
@@ -87,15 +69,8 @@ router.get('/index', async (req, res, next) => {
   }
 })
 
-router.post('/upload', upload.single('pipeline'), (req: MulterRequest, res, next) => {
-  try {
-    /* if (req.file && req.file.name.toLowerCase().includes('jenkinsfile'))
-      throw new Error("file is not Jenkinsfile"); */
-
+router.post('/upload', upload.single('pipeline'), (req: MulterRequest, res) => {
     res.json(req.file);
-  } catch (err) {
-    next(err);
-  }
 });
 
 export default router;

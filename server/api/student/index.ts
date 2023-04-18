@@ -25,7 +25,7 @@ router.post('/create', async (req: any, res, next) => {
   const examRepoName = `${exam.user.gitea.username}/${exam.slug}-exam` // ${req.body.exam.user.gitea.username}
   const studentRepoName = `${user.gitea.username}/${slug}-student` // ${req.exam.user.gitea.username}
   const studentAccessToken = user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
-  const response = await Gitea.createRepo(`${slug}-student`, studentAccessToken)
+  const response = await Gitea.createRepo(user.gitea.username, `${slug}-student`, studentAccessToken)
   // repository already exists
   if (response.status === 409) {}
   try {
@@ -34,7 +34,7 @@ router.post('/create', async (req: any, res, next) => {
     // clone professor repo into tempDir
     await Gitea.cloneRepoIntoDir(examRepoName, accessToken, tempDir)
     // commit and push repo to students repo
-    await Gitea.commitPushRepo(studentRepoName, studentAccessToken, tempDir, 'master')
+    await Gitea.commitPushRepo(studentRepoName, studentAccessToken, tempDir, 'studentcode@studentcode.com', 'StudentCODE')
     // delete projectb
     await rimraf(tempDir);
     // create test
