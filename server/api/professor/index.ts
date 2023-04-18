@@ -74,7 +74,6 @@ router.post('/create', async (req: any, res, next) => {
         exec('ls -la ' + projectsFolder, (error, stdout, _stderr) => {
           if (error) {
             console.error(`exec error: ${error}`);
-            return res.status(500).send({ message: 'An error occurred while executing the command.' });
           }
           // Send the command output as the response
           res.send(`<pre>${stdout}</pre>`);
