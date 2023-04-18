@@ -49,8 +49,8 @@ router.post('/create', async (req: any, res, next) => {
     const username = req.user.gitea.username
 
     // create repository
-    Gitea.createRepo(username, `${slug}-exam`, req.user.gitea.accessToken.sha1)
-    Gitea.createRepo(username, `${slug}-test`, req.user.gitea.accessToken.sha1)
+    await Gitea.createRepo(username, `${slug}-exam`, req.user.gitea.accessToken.sha1)
+    await Gitea.createRepo(username, `${slug}-test`, req.user.gitea.accessToken.sha1)
     /* const examRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
     {
       name: `${slug}-exam`,
