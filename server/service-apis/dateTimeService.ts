@@ -19,19 +19,18 @@ export default class DateTimeService {
 
 
     // Parse date and time string and set timezone
-    const date = DateTime.fromFormat(dateTimeString, 'dd/MM/yyyy hh:mm')//.setZone(correctTimezone, {keepCalendarTime: true})
+    const date = DateTime.fromFormat(dateTimeString, 'dd/MM/yyyy hh:mm').setZone(correctTimezone, {keepCalendarTime: true})
 
     // Convert to JavaScript Date object
     const jsDate = date.toJSDate();
     console.log('jsDate: ' + jsDate);
-    const correctDate = new Date(
-      jsDate.toLocaleString('sk-SK', {
-        correctTimezone,
-      }),
-    );
-    console.log('correctDate: ' + correctDate);
-    //return jsDate;
-    return correctDate
+    // const correctDate = new Date(
+    //   jsDate.toLocaleString('sk-SK', {
+    //     correctTimezone,
+    //   }),
+    // );
+    // console.log('correctDate: ' + correctDate);
+    return jsDate;
   };
 
   public static getTimezoneByIp = async (ipAddress: string): Promise<string> => {
