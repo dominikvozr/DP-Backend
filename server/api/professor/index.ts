@@ -70,7 +70,7 @@ router.post('/create', async (req: any, res, next) => {
 
     fs.createReadStream(zipFilePath)
       .pipe(unzipper.Extract({ path: projectsFolder }))
-      .on('finish', async () => {
+      .on('close', async () => {
         exec('ls -la ' + projectsFolder, (error, stdout, _stderr) => {
           if (error) {
             console.error(`exec error: ${error}`);
