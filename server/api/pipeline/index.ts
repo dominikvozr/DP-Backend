@@ -3,7 +3,7 @@ import * as express from 'express';
 import rimraf from 'rimraf';
 import { generateSlug } from './../../utils/slugify';
 import Pipeline from './../../models/Pipeline';
-import Gitea from 'server/service-apis/gitea';
+import Gitea from './../../service-apis/gitea';
 const multer = require('multer')
 const fs = require('fs');
 const path = require('path');
