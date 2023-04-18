@@ -136,7 +136,7 @@ interface ExamModel extends mongoose.Model<ExamDocument> {
     tests: Array<object>,
   }): Promise<ExamDocument[]>;
 
-  createExam(data: ExamDocument, user: Express.User, slug: string, ip: string): Promise<ExamDocument[]>;
+  createExam(data: ExamDocument, user: Express.User, slug: string): Promise<ExamDocument[]>;
 }
 
 class ExamClass extends mongoose.Model {
@@ -182,7 +182,7 @@ class ExamClass extends mongoose.Model {
       return {status: 'forbidden', isAuthenticated: false}
   }
 
-  public static async createExam(data, user, slug, ip) {
+  public static async createExam(data, user, slug) {
 
     data['user'] = user._id
     data['slug'] = slug
@@ -196,8 +196,8 @@ class ExamClass extends mongoose.Model {
 
 
     try {
-      data.startDate = await DateTimeService.createDateObject(data.startDate, data.startTime, ip)
-      data.endDate = await DateTimeService.createDateObject(data.endDate, data.endTime, ip)
+      data.startDate = await DateTimeService.createDateObject(data.startDate, data.startTime, data.timezone)
+      data.endDate = await DateTimeService.createDateObject(data.endDate, data.endTime, data.timezone)
     } catch (error) {
       console.error('Error:', error.message);
     }

@@ -10,27 +10,25 @@ const Cabin = require('cabin');
 const { Signale } = require('signale');
 const MongoStore = require('connect-mongo')(session);
 const bodyParser = require('body-parser')
-const requestIp = require('request-ip');
 
 import { setupGoogleOAuth } from "./google-strategy";
 import apiRouter from './api';
-import { timezoneMiddleware } from './middlewares/timezoneMiddleware';
 // helm upgrade studentcode-be-helm-chart helm-chart -f values.yaml
 // eslint-disable-next-line
 require('dotenv').config();
 
-const username = process.env.MONGO_USERNAME;
+/* const username = process.env.MONGO_USERNAME;
 const password = encodeURIComponent(process.env.MONGO_PASSWORD);
 const database = process.env.MONGO_DATABASE;
 const mongoService = process.env.MONGO_SERVICE;
 const mongoPort = process.env.MONGO_PORT;
 
-const uri = `mongodb://${username}:${password}@${mongoService}:${mongoPort}/${database}?retryWrites=true&w=majority`;
+const uri = `mongodb://${username}:${password}@${mongoService}:${mongoPort}/${database}?retryWrites=true&w=majority`; */
 
 mongoose.set('strictQuery', false);
-mongoose.connect(uri);
+// mongoose.connect(uri);
 // for development purpose only
-// mongoose.connect(process.env.MONGO_DB_TEST);
+mongoose.connect(process.env.MONGO_DB_TEST);
 
 const cabin = new Cabin({
   axe: {
@@ -70,9 +68,6 @@ server.use(
   }),
 );
 
-server.set('trust proxy', true);
-server.use(requestIp.mw());
-server.use(timezoneMiddleware);
 
 
 // Session settings
