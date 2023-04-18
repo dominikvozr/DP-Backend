@@ -9,7 +9,7 @@ const exec = util.promisify(child_process.exec);
 
 export default class Gitea {
 
-  public static createRepo = async (repo: string, token: string) => {
+  public static createRepo = async (username: string, repo: string, token: string) => {
     try {
       const examRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`, {
         name: repo,
@@ -23,7 +23,19 @@ export default class Gitea {
       });
       return examRepoResponse
     } catch (err) {
-      return err.response
+      try {
+        await axios.delete(`${process.env.GITEA_URL}/api/v1/repos/${username}/${repo}`,
+        {
+          headers: {
+            Authorization: `token ${process.env.GITEA_ADMIN_ACCESS_TOKEN}`
+          }
+        });
+        this.createRepo(username, repo, token)
+      } catch (error) {
+        console.error(error);
+        console.error(err)
+        return err.response
+      }
     }
   }
 

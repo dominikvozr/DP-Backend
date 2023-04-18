@@ -50,7 +50,9 @@ router.post('/create', async (req: any, res, next) => {
     const username = req.user.gitea.username
 
     // create repository
-    const examRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
+    Gitea.createRepo(username, `${slug}-exam`, req.user.gitea.accessToken.sha1)
+    Gitea.createRepo(username, `${slug}-test`, req.user.gitea.accessToken.sha1)
+    /* const examRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
     {
       name: `${slug}-exam`,
       private: true,
@@ -78,7 +80,7 @@ router.post('/create', async (req: any, res, next) => {
     });
     if (testRepoResponse.status > 299) {
       throw new Error('Failed to create Repository');
-    }
+    } */
 
     fs.mkdirSync(testsFolder, { recursive: true })
     fs.rename(testFilePath, `${testsFolder}/tests.${extension}`, function (err) {
