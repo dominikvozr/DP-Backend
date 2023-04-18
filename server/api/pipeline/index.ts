@@ -69,7 +69,7 @@ router.get('/index', async (req, res, next) => {
   }
 })
 
-router.post('/upload', upload.single('pipeline'), (req: MulterRequest, res, next) => {
+router.post('/upload', upload.single('pipeline'), (req: MulterRequest, res) => {
     res.json(req.file);
 });
 
