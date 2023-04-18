@@ -8,12 +8,9 @@ const path = require('path');
 const fs = require('fs-extra');
 const multer = require('multer')
 const unzipper = require('unzipper');
-const simpleGit = require('simple-git');
 const rimraf = require('rimraf');
 const readline = require('readline');
 const { exec } = require('child_process');
-//const { Readable } = require('stream');
-
 
 // MulterRequest to prevent errors
 interface MulterRequest extends express.Request {
@@ -40,7 +37,6 @@ const router = express.Router();
 router.post('/create', async (req: any, res, next) => {
   try {
     const slug = await generateSlug(Exam, req.body.name);
-    const defaultBranch = 'master'
     const projectsFolder = path.join(__dirname, 'upload', 'projects', Math.random().toString(36).slice(-8))
     const testsFolder = `upload/tests/${Math.random().toString(36).slice(-8)}`
     const zipFilePath = req.body.project.path;
@@ -59,11 +55,12 @@ router.post('/create', async (req: any, res, next) => {
     })
 
     // Initialize git repository in projects folder and commit changes
-    const git = simpleGit(testsFolder, { config: [`user.email=${req.user.email}`, `user.name=${req.user.displayName}`] });
-    await git.init()
-    await git.add('./*')
-    await git.commit('Initial commit')
-    await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-test.git`, defaultBranch);
+    try {
+      await Gitea.commitPushRepo(`${username}/${slug}-test`, accessToken, testsFolder, req.user.email, req.user.displayName)
+      console.log('Git repository reinitialized')
+    } catch (error) {
+      console.error('Error reinitializing Git repository:', error)
+    }
     const rimrafRes = await rimraf(testsFolder);
       if(rimrafRes)
         console.log('Tests folder cleaned up');
@@ -71,9 +68,9 @@ router.post('/create', async (req: any, res, next) => {
     fs.createReadStream(zipFilePath)
       .pipe(unzipper.Extract({ path: projectsFolder }))
       .on('close', async () => {
-        exec('ls -la ' + projectsFolder, (error, stdout, _stderr) => {
+        exec('ls -la ' + projectsFolder, (error, stdout, stderr) => {
           if (error) {
-            console.error(`exec error: ${error}`);
+            console.error(`exec error: ${error}, stderr: ${stderr}`);
           }
           console.log('stdout: ' + stdout);
         });
@@ -85,7 +82,11 @@ router.post('/create', async (req: any, res, next) => {
           console.error('Error reinitializing Git repository:', error)
         }
 
-        const exam = await Exam.createExam(req.body, req.user, slug);
+        const rimrafRes = await rimraf(projectsFolder);
+        if(rimrafRes)
+          console.log('Tests folder cleaned up');
+
+          const exam = await Exam.createExam(req.body, req.user, slug);
         res.json({exam, message: 'success'});
       });
   } catch (err) {
