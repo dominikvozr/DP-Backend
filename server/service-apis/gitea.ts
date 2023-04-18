@@ -30,9 +30,9 @@ export default class Gitea {
             Authorization: `token ${process.env.GITEA_ADMIN_ACCESS_TOKEN}`
           }
         });
-        console.log('repos: ' + repos);
-
+        console.log('repos: ' + JSON.stringify(repos));
         await this.createRepo(username, repo, token)
+        console.log('repo deleted');
       } catch (error) {
         console.error(error);
         console.error(err)
