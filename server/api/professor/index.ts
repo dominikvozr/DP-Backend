@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import axios from 'axios';
 import * as express from 'express';
 import { generateSlug } from '../../utils/slugify';
 import Exam from './../../models/Exam';
@@ -9,11 +8,9 @@ const path = require('path');
 const fs = require('fs-extra');
 const multer = require('multer')
 const unzipper = require('unzipper');
-const simpleGit = require('simple-git');
 const rimraf = require('rimraf');
 const readline = require('readline');
-//const { Readable } = require('stream');
-
+const { exec } = require('child_process');
 
 // MulterRequest to prevent errors
 interface MulterRequest extends express.Request {
@@ -40,7 +37,6 @@ const router = express.Router();
 router.post('/create', async (req: any, res, next) => {
   try {
     const slug = await generateSlug(Exam, req.body.name);
-    const defaultBranch = 'master'
     const projectsFolder = path.join(__dirname, 'upload', 'projects', Math.random().toString(36).slice(-8))
     const testsFolder = `upload/tests/${Math.random().toString(36).slice(-8)}`
     const zipFilePath = req.body.project.path;
@@ -50,70 +46,49 @@ router.post('/create', async (req: any, res, next) => {
     const username = req.user.gitea.username
 
     // create repository
-    const examRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
-    {
-      name: `${slug}-exam`,
-      private: true,
-      default_branch: defaultBranch,
-    },
-    {
-      headers: {
-        Authorization: `token ${req.user.gitea.accessToken.sha1}`
-      }
-    });
-    if (examRepoResponse.status > 299) {
-      throw new Error('Failed to create Repository');
-    }
-
-    const testRepoResponse = await axios.post(`${process.env.GITEA_URL}/api/v1/user/repos`,
-    {
-      name: `${slug}-test`,
-      private: true,
-      default_branch: defaultBranch,
-    },
-    {
-      headers: {
-        Authorization: `token ${req.user.gitea.accessToken.sha1}`
-      }
-    });
-    if (testRepoResponse.status > 299) {
-      throw new Error('Failed to create Repository');
-    }
+    await Gitea.createRepo(username, `${slug}-exam`, req.user.gitea.accessToken.sha1)
+    await Gitea.createRepo(username, `${slug}-test`, req.user.gitea.accessToken.sha1)
 
     fs.mkdirSync(testsFolder, { recursive: true })
-    fs.rename(testFilePath, `${testsFolder}/tests${extension}`, function (err) {
+    fs.rename(testFilePath, `${testsFolder}/tests.${extension}`, function (err) {
       if (err) throw err
     })
 
     // Initialize git repository in projects folder and commit changes
-    const git = simpleGit(testsFolder, { config: [`user.email=${req.user.email}`, `user.name=${req.user.displayName}`] });
-    await git.init()
-    await git.add('./*')
-    await git.commit('Initial commit')
-    await git.push(`http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-test.git`, defaultBranch);
+    try {
+      await Gitea.commitPushRepo(`${username}/${slug}-test`, accessToken, testsFolder, req.user.email, req.user.displayName)
+      console.log('Git repository reinitialized')
+    } catch (error) {
+      console.error('Error reinitializing Git repository:', error)
+    }
     const rimrafRes = await rimraf(testsFolder);
       if(rimrafRes)
-        console.log('Projects folder cleaned up');
+        console.log('Tests folder cleaned up');
 
     fs.createReadStream(zipFilePath)
       .pipe(unzipper.Extract({ path: projectsFolder }))
-      .on('finish', async () => {
+      .on('close', async () => {
+        exec('ls -la ' + projectsFolder, (error, stdout, stderr) => {
+          if (error) {
+            console.error(`exec error: ${error}, stderr: ${stderr}`);
+          }
+          console.log('stdout: ' + stdout);
+        });
         console.log('Zip file extracted successfully');
         try {
-          const git = await Gitea.reinitializeRepo(projectsFolder, req.user.email, req.user.displayName)
-          await git.add(['-f', '.'])
-          await git.commit('Initial commit')
-          await git.addRemote('newRemote', `http://${accessToken}@bawix.xyz:81/gitea/${username}/${slug}-exam.git`);
-          await git.push(['--all', '--force', 'newRemote']);
-          await git.pushTags('newRemote');
+          await Gitea.commitPushRepo(`${username}/${slug}-exam`, accessToken, projectsFolder, req.user.email, req.user.displayName)
           console.log('Git repository reinitialized')
         } catch (error) {
           console.error('Error reinitializing Git repository:', error)
         }
-      });
 
-    const exam = await Exam.createExam(req.body, req.user, slug);
-    res.json({exam, message: 'success'});
+        const rimrafRes = await rimraf(projectsFolder);
+        if(rimrafRes)
+          console.log('Tests folder cleaned up');
+
+          const exam = await Exam.createExam(req.body, req.user, slug);
+        res.json({exam, message: 'success'});
+      });
   } catch (err) {
     next(err);
   }
