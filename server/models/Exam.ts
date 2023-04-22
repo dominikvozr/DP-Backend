@@ -169,8 +169,8 @@ class ExamClass extends mongoose.Model {
       return {status: 'forbidden', isAuthenticated: false}
   }
 
-  public static async getExamBySlug(slug : string, user: any) {
-    const exam = await this.findOne({slug: slug, 'user': user._id}).populate('user');
+  public static async getExamBySlug(slug : string, _user: any) {
+    const exam = await this.findOne({slug: slug}).populate('user');
     return exam
   }
 
