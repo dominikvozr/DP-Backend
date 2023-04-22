@@ -1,7 +1,6 @@
 import {Request, Response, Router} from 'express';
 import axios, { AxiosError } from 'axios';
 import {setSessionTokenHeader} from "./users";
-import * as console from "console";
 const router = Router();
 
 const API_BASE_URL = 'http://bawix.xyz:81/api/v2';
@@ -92,7 +91,6 @@ router.get('/status/:username/:workspace',setSessionTokenHeader, async (req: Req
                 headers: {
                     'Coder-Session-Token': sessionToken}
         });
-        console.log(`${API_BASE_URL}/users/${req.params.username}/workspace/${req.params.workspace}`)
         res.json(response.data);
 
     } catch (error) {

@@ -178,9 +178,9 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
     try {
         const creatorBody = {
             email: process.env.USER_ADMIN_EMAIL,
-            password: process.env.USER_ADMIN_PASS
-        }
+            password: process.env.USER_ADMIN_PASS,
 
+        }
         const creatorResponse = await axios.post(`${API_BASE_URL}/users/login`,
             JSON.stringify(creatorBody));
 
@@ -204,17 +204,17 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
             email: newUser['email'],
             organization_id:orgId,
             password: newPass,
-            username: newUser['displayName']
+            username: newUser['displayName'].replace(" ","-")
         }
 
-        await User.updatePass({userId:newUser['id'],newPass:newPass})
-
         const responseCreate = await axios.post(`${API_BASE_URL}/users`,  JSON.stringify(newUserBody),
-            {
-            headers: {
-                'Coder-Session-Token': creatorToken
-            }
-        });
+                {
+                    headers: {
+                        'Coder-Session-Token': creatorToken
+                    }
+                });
+
+        await User.updatePass({userId:newUser['id'],newPass:newPass})
 
         UUID = responseCreate.data.id; // User ID for unique calls
         ORG = responseCreate.data.organization_ids[0]; // ORG is needed for creating workspace
@@ -227,8 +227,9 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
         SESSION_TOKEN = responseLogin.data.session_token;
         await User.updateCoderData({userId:newUser['id'],organizationId:ORG,coderId:UUID,coderSessionToken:SESSION_TOKEN})
 
-        res.json(responseCreate.data);
     } catch (error) {
+
+        console.log(error.cause)
         handleAxiosError(error, res);
     }
 });
