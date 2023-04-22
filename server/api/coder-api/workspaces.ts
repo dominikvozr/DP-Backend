@@ -1,9 +1,10 @@
 import {Request, Response, Router} from 'express';
 import axios, { AxiosError } from 'axios';
 import {setSessionTokenHeader} from "./users";
+import * as console from "console";
 const router = Router();
 
-let API_BASE_URL = 'http://bawix.xyz:81/api/v2';
+const API_BASE_URL = 'http://bawix.xyz:81/api/v2';
 
 // Set custom headers for all axios requests
 axios.defaults.headers.common['Accept'] = 'application/json';
@@ -16,7 +17,7 @@ router.post('/', setSessionTokenHeader, async (req: Request, res: Response) => {
         const ORG = user['organizationId'];
         const UUID = user['coderId'];
         const sessionToken = user['coderSessionToken']
-        API_BASE_URL = `http://bawix.xyz:81/api/v2/organizations/${ORG}/members/${UUID}`;
+        const API_BASE_URL = `http://bawix.xyz:81/api/v2/organizations/${ORG}/members/${UUID}`;
         const response = await axios.post(`${API_BASE_URL}/workspaces`, req.body,{
             headers: {
                 'Coder-Session-Token': sessionToken
@@ -50,19 +51,20 @@ router.put('/:id/extend', setSessionTokenHeader, async (req: Request, res: Respo
 });
 
 // Route to redirect to workspace link
-router.get('/:workspace/session',setSessionTokenHeader, async (req: Request, res: Response) => {
+router.get('/session/:username/:workspace',setSessionTokenHeader, async (req: Request, res: Response) => {
     try {
         const user = req.user.valueOf();
         const email = user['email'];
-        const name = user['displayName'];
         const password= user['sessionPass'];
+        const token = user['coderSessionToken']
+        // const workspace = `http://bawix.xyz:81/login?redirect=%2F%40${req.params.username}%2F${req.params.workspace}.main%2Fapps%2Fcode-server`;
+        const workspace = `http://bawix.xyz:81/@${req.params.username}/${req.params.workspace}.main/apps/code-server/`
 
-        API_BASE_URL = `http://bawix.xyz:81/@${name}/${req.params.workspace}.main/apps/code-server`
-        const workspace = "${API_BASE_URL}/?folder=/home/coder"
         const response= {
             email:email,
             password:password,
-            workspaceLink: workspace
+            workspaceLink: workspace,
+            sessionToken: token
         }
         res.json(JSON.stringify(response));
     } catch (error) {
@@ -81,10 +83,43 @@ router.put('/:id/autostart', setSessionTokenHeader, async (req: Request, res: Re
     }
 });
 
+router.get('/status/:username/:workspace',setSessionTokenHeader, async (req: Request, res: Response) => {
+    try {
+        const user = req.user.valueOf();
+        const sessionToken = user['coderSessionToken']
+        const response =
+            await axios.get(`${API_BASE_URL}/users/${req.params.username}/workspace/${req.params.workspace}`,  {
+                headers: {
+                    'Coder-Session-Token': sessionToken}
+        });
+        console.log(`${API_BASE_URL}/users/${req.params.username}/workspace/${req.params.workspace}`)
+        res.json(response.data);
+
+    } catch (error) {
+        res.json({latest_build:{status:"unfound"}, error: error.response?.data});
+    }
+});
+
+router.get('/status/:workspaceId',setSessionTokenHeader, async (req: Request, res: Response) => {
+    try {
+        const user = req.user.valueOf();
+        const sessionToken = user['coderSessionToken']
+        const response =
+            await axios.get(`${API_BASE_URL}/workspaces/${req.params.workspaceId}/watch`,  {
+                headers: {
+                    'Coder-Session-Token': sessionToken
+                }
+            });
+        res.json(JSON.stringify({response:response.data, url:`${API_BASE_URL}/workspaces/${req.params.workspaceId}/watch`}));
+
+    } catch (error) {
+        res.json({latest_build:{status:"unfound"}, error: error.response?.data});
+    }
+});
 
 // Helper function to handle Axios errors
 function handleAxiosError(error: AxiosError, res: Response) {
-    res.status(error.response?.status ?? 500).json(error.response?.data ?? 'Internal Server Error');
+    res.status(error.response?.status ?? 500).json(error.response?.data ?? `Internal Server Error: ${error.cause}`);
 }
 
 export default router;
