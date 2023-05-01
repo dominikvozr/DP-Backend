@@ -151,6 +151,7 @@ class ExamClass extends mongoose.Model {
     const skip = page ? (page-1) * limit : 0
     const examsCount = await this.count()
     const exams = await this.find({'user': user._id})
+      .populate('user')
       .sort({createdAt: 'desc'})
       .skip(skip)
       .limit(limit)

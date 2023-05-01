@@ -102,7 +102,10 @@ interface TestModel extends mongoose.Model<TestDocument> {
 
 class TestClass extends mongoose.Model {
   public static async getTests(user: any) {
-    const exams = await this.find({'user': user._id}).populate('user')
+    const exams = await this.find({ 'user': user._id })
+      .populate('user')
+      .populate('exam')
+      .sort({ startedAt: 'desc' })
     return exams
   }
 
