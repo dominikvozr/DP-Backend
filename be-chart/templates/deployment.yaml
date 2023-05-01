@@ -138,6 +138,23 @@ spec:
               value: "/server"
             - name: MONGO_PORT
               value: "27017"
+            - name: API_BASE_URL
+              value: "http://bawix.xyz:81/api/v2"
+            - name: USER_ADMIN_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: user-admin-access
+                  key: NAME
+            - name: USER_ADMIN_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: user-admin-access
+                  key: PASSWORD
+            - name: USER_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: user-admin-access
+                  key: EMAIl
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

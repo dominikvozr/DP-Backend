@@ -3,6 +3,7 @@ import axios, {AxiosError} from 'axios';
 import * as cookieParser from 'cookie-parser';
 import * as process from "process";
 import User from "../../models/User";
+import {validateUsername} from "./utils/utils";
 const router = Router();
 const generator = require('generate-password');
 
@@ -119,7 +120,6 @@ router.post('/users/login',setSessionTokenCookie,setUserCookie,setORGCookie,
 
         UUID = responseUser.data.id; // User ID for unique calls
         ORG = responseUser.data.organization_ids[0]; // ORG is needed for creating workspace
-
         await User.updateCoderData({userId:user['id'],organizationId:ORG,coderId:UUID,coderSessionToken:SESSION_TOKEN})
         res.json(responseUser.data);
     } catch (error) {
@@ -204,9 +204,8 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
             email: newUser['email'],
             organization_id:orgId,
             password: newPass,
-            username: newUser['displayName'].replace(" ","-")
+            username: validateUsername(newUser['displayName'])
         }
-
         const responseCreate = await axios.post(`${API_BASE_URL}/users`,  JSON.stringify(newUserBody),
                 {
                     headers: {
