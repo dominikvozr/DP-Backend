@@ -73,9 +73,9 @@ router.get('/exam/:slug', async (req, res, next) => {
   }
 })
 
-router.get('/update/results/:id/', async (req, res, next) => {
+router.put('/update/score/:id', async (req, res, next) => {
   try {
-    const result = await Test.updateTestResults(req.params.id, req.body.results, req.user);
+    const result = await Test.updateTestResults(req.params.id, req.body, req.user);
     console.log(result);
     res.json({result: 'success'});
   } catch (err) {
