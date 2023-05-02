@@ -141,6 +141,8 @@ router.post('/upload/tests', upload.single('tests'), (req: MulterRequest, res, n
 router.get('/index', async (req: IndexRequest, res, next) => {
   try {
     const page = parseInt(req.query.page.toString())
+    console.log(req.query);
+
     const data = await Exam.getExams(req.user, page);
     res.json({isAuthorized: req.user ? true : false, user: req.user || null, data});
   } catch (err) {

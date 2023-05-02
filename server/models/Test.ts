@@ -42,6 +42,12 @@ const testSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  reports: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Report',
+    },
+  ],
   score: {
     tests: Array,
     points: Number,
@@ -144,12 +150,19 @@ class TestClass extends mongoose.Model {
   }
 
   public static async getTestsByExam(examId: string, user: any) {
-    const test = await this.find({exam: examId, user: user._id}).populate('user');
-    return test
+    const tests = await this.find({ exam: examId, user: user._id }).populate('user').populate('reports');
+    return tests
   }
 
   public static async getTestByExamSlug(slug: string, user: any) {
-    return await this.find({examSlug: slug, userId: user.id});
+    return await this.findOne({examSlug: slug, user: user._id})
+      .populate('reports')
+      .populate({
+        path: 'exam',
+        populate: [
+          { path: 'user' },
+        ],
+      });;
   }
 
   public static async checkIfExists(exam, user) {
@@ -184,10 +197,10 @@ class TestClass extends mongoose.Model {
     return test
   }
 
-  public static async updateTestResults(testId, results: Score, user: any) {
-    const test = await this.findById(testId).populate('user');
-    if (test.user._id !== user._id) return 'forbidden'
-    const modifier = { score: results };
+  public static async updateTestResults(testId, test: any, user: any) {
+    //const test = await this.findById(testId).populate('user');
+    if (test.user !== user.id) return 'forbidden'
+    const modifier = { score: test.score };
     return this.findByIdAndUpdate(testId, { $set: modifier }, { new: true, runValidators: true })
       .setOptions({ lean: true });
   }
@@ -223,7 +236,7 @@ function createResults(test: any, testResults) {
       tests: testResults,
       points,
       message: JSON.stringify(testResults),
-      percentage: points / test.exam.points * 100,
+      percentage: (points / test.exam.points * 100).toFixed(2),
       mark: '',
       time: new Date(),
   }
