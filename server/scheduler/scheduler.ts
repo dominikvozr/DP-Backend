@@ -134,7 +134,8 @@ class Scheduler {
 
   private async scheduleExamEnd(end: Date, jobData: {examId: string}){
     // Define the job schedule to run on a specific date and time (in this example, March 20th 2023 at 12:00:00)
-      schedule.scheduleJob({ start: end, rule: end, tz: 'Europe/Bratislava' }, function() {
+      // Europe/Bratislava
+      schedule.scheduleJob({ start: end, rule: end, tz: 'Etc/GMT0' }, function() {
         // Find the document you want to update (replace "id_of_exam" with the ID of the exam you want to update)
         Exam.findById(jobData.examId, function(err, exam) {
           if (err) return console.log(err);
