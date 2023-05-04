@@ -207,12 +207,27 @@ class TestClass extends mongoose.Model {
     return test
   }
 
-  public static async updateTestResults(testId, test: any, user: any) {
-    //const test = await this.findById(testId).populate('user');
-    if (test.user !== user.id) return 'forbidden'
-    const modifier = { score: test.score };
-    return this.findByIdAndUpdate(testId, { $set: modifier }, { new: true, runValidators: true })
-      .setOptions({ lean: true });
+  public static async updateTestResults(testId, testData: any, user: any) {
+    const test = await this.findById(testId).populate({
+      path: 'exam',
+      populate: [
+        { path: 'user' },
+      ],
+    });
+    if (test.exam.user.id !== user.id) return 'forbidden'
+    test.score = testData.score;
+    test.save();
+    Event.createEvent({
+      userId: test.user._id,
+      fromUser: user._id,
+      name: `Evaluation changed`,
+      description: `${user.displayName} changed your evaluation.`,
+      link: `student/test/${test.slug}`,
+      type: 'evaluationChanged',
+    });
+    return test
+    /* return this.findByIdAndUpdate(testId, { $set: modifier }, { new: true, runValidators: true })
+      .setOptions({ lean: true }); */
   }
 
   public static async setTestResults(testId: string, results: Score) {
