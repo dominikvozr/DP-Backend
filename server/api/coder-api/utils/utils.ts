@@ -22,6 +22,6 @@ export function createMailData(email:string,pass:string){
         to: email,   // list of receivers
         subject: 'Student Code Access',
         text: 'Prístupy do Student code',
-        html: `<div style="display: grid"><h3>Vaše Prihlasovacie údaje</h3><b>email: ${email}</b><b>heslo: ${pass}</b></div>`
+        html: `<div style="display: grid"><h3>Vaše Prihlasovacie údaje</h3><b>email: ${email}</b><b>heslo: ${pass}</b><p>Heslo je jednorázové!</p></div>`
     };
 }

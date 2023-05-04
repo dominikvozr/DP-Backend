@@ -155,6 +155,16 @@ spec:
                 secretKeyRef:
                   name: user-admin-access
                   key: EMAIl
+            - name: MAILER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: mailer-access
+                  key: MAILER_EMAIL
+            - name: MAILER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mailer-access
+                  key: MAILER_PASSWORD
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
