@@ -3,7 +3,7 @@ import * as mongoose from 'mongoose';
 //import async from 'async'
 import Exam from './Exam';
 import { isEmpty } from 'lodash';
-//import Exam from './Exam';
+import Event from './Event';
 
 interface Score {
     tests: [],
@@ -150,7 +150,10 @@ class TestClass extends mongoose.Model {
   }
 
   public static async getTestsByExam(examId: string, user: any) {
-    const tests = await this.find({ exam: examId, user: user._id }).populate('user').populate('reports');
+    const tests = await this.find({ exam: examId, user: user._id }).populate('user').populate({
+      path: 'reports',
+      match: { isOpen: true },
+    });
     return tests
   }
 
@@ -174,13 +177,12 @@ class TestClass extends mongoose.Model {
   }
 
   public static async createTest(exam, user, slug) {
-    console.log('Static method: createTest');
     // TODO uncomment code below in production
-    /* const checked = await this.checkIfExists(exam, user)
+    const checked = await this.checkIfExists(exam, user)
     if (checked) {
       console.error('test already exists');
       throw Error('test already exists')
-    } */
+    }
     const data = {
       user: user._id,
       exam: exam._id,
@@ -193,6 +195,14 @@ class TestClass extends mongoose.Model {
     const test = new Test(data)
     test.save(function(err) {
       if (err) console.log(err);
+    });
+    Event.createEvent({
+      userId: exam.user._id,
+      fromUser: user._id,
+      name: `${user.displayName}`,
+      description: `has logged in to your exam ${exam.name}.`,
+      link: `professor/exam/${exam.id}/`,
+      type: 'testCreate',
     });
     return test
   }
@@ -209,16 +219,22 @@ class TestClass extends mongoose.Model {
     const test = await this.getTestById(testId, null);
     const dbResults = createResults(test, results)
     const modifier = { score: dbResults, isOpen: false };
-    return this.findByIdAndUpdate(testId, { $set: modifier }, { new: true, runValidators: true })
+    const updatedTest = await this.findByIdAndUpdate(testId, { $set: modifier }, { new: true, runValidators: true })
       .setOptions({ lean: true });
+    Event.createEvent({
+      userId: test.user._id,
+      name: `Test evaluation ended`,
+      description: `${test.user.displayName}, your test (${test.exam.name}) evaluation has ended.`,
+      link: `student/test/${test.slug}/`,
+      type: 'evaluationEnded',
+    });
+    return updatedTest
   }
-
 }
 
 function createResults(test: any, testResults) {
   const testArr = test.exam.tests
   let points = 0;
-
   testResults.map((result, index) => {
     if (!result.result){
       testResults[index].value = 0
