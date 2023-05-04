@@ -6,6 +6,7 @@ import StudentTestApi from './student';
 import StudentEvaluationApi from './student/evaluation';
 import professorPipelineApi from './pipeline';
 import reportApi from './report';
+import eventApi from './event';
 import userExpressRoutes from './user';
 import userCoderExpressRoutes from './coder-api/users'
 import workspacesCoderExpressRoutes from './coder-api/workspaces'
@@ -52,6 +53,7 @@ apiRouter.use('/api/v1/professor/exam', isAuthenticated, professorExamApi, handl
 apiRouter.use('/api/v1/student/test', isAuthenticated, StudentTestApi, handleError);
 apiRouter.use('/api/v1/student/evaluation', tokenAuthorize, StudentEvaluationApi, handleError);
 apiRouter.use('/api/v1/report', isAuthenticated, reportApi, handleError);
+apiRouter.use('/api/v1/event', isAuthenticated, eventApi, handleError);
 apiRouter.use('/api/v1/pipeline', isAuthenticated, professorPipelineApi, handleError);
 apiRouter.use('/api/v1/coder',isAuthenticated,userCoderExpressRoutes,handleError);
 apiRouter.use('/api/v1/coder/workspaces',isAuthenticated,workspacesCoderExpressRoutes,handleError);

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as express from 'express';
 import Test from './../../models/Test';
+import Event from './../../models/Event';
 import Jenkins from './../../service-apis/jenkins';
 import Gitea from './../../service-apis/gitea';
 const git = require('simple-git');
@@ -64,6 +65,12 @@ router.post('/evaluate', async (req: any, res: any) => {
     await projectRepo.push('origin', 'test', ['--force']);
     // start evaluation process on pushed test
     await Jenkins.startEvaluate(repoName, accessToken)
+    Event.createEvent({
+      userId: test.user._id,
+      name: `Test evaluation started`,
+      description: `${test.user.displayName}, your test evaluation has started.`,
+      type: 'evaluationStarted',
+    });
     console.log(`Successfully triggered Seed Job for ${repoName}`);
     // Clean up temporary directories
     fs.rmSync(tempDir, { recursive: true });
