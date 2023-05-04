@@ -217,9 +217,6 @@ class ExamClass extends mongoose.Model {
     } catch (error) {
       console.error('Error:', error.message);
     }
-    console.log(data.startDate);
-    console.log(data.endDate);
-
     const exam = new Exam(data);
     exam.save((err, savedExam) => {
       if (err) {
@@ -230,7 +227,7 @@ class ExamClass extends mongoose.Model {
       Scheduler.getInstance().scheduleExamSimple(savedExam.startDate, savedExam.endDate, {
         examId: savedExam._id,
       });
-      return exam // exam[0]
+      return exam
     });
 
   }

@@ -1,6 +1,7 @@
 // import * as _ from 'lodash';
 import * as mongoose from 'mongoose';
 import Test from './Test';
+import Event from './Event';
 
 const reportSchema = new mongoose.Schema({
   user: {
@@ -34,13 +35,13 @@ interface ReportDocument extends mongoose.Document {
 }
 
 interface ReportModel extends mongoose.Model<ReportDocument> {
-  getReport(reportId: string): Promise<ReportDocument[]>;
+  getReport(reportId: string, user: any): Promise<ReportDocument[]>;
 
-  getTestReports(testId: string): Promise<ReportDocument[]>;
+  getTestReports(testId: string, user: any): Promise<ReportDocument[]>;
 
   createReport(reportData: any, user: any): Promise<ReportDocument[]>;
 
-  updateReport(reportData: any): Promise<ReportDocument[]>;
+  updateReport(reportData: any, test: any, user: any): Promise<ReportDocument[]>;
 }
 
 class ReportClass extends mongoose.Model {
@@ -80,10 +81,18 @@ class ReportClass extends mongoose.Model {
       report.save(function (err) {
         if (err) console.log(err);
       });
-      const test: any = await Test.findById(reportData.testId)
+      const test: any = await Test.getTestById(reportData.testId, user)//  .findById(reportData.testId)
       test.reports.push(report._id)
       test.save(function (err) {
         if (err) console.log(err);
+      });
+      Event.createEvent({
+        userId: test.exam.user._id,
+        fromUser: test.user._id,
+        name: `Report: ${test.exam.name}`,
+        description: `${test.user.displayName}: ${report.message}`,
+        link: `professor/exam/${test.exam.id}?email=${test.user.email}&tab=reports`,
+        type: 'report',
       });
       return report
     } catch (error) {
@@ -100,11 +109,20 @@ class ReportClass extends mongoose.Model {
   }
   */
 
-  public static async updateReport(reportData: any) {
+  public static async updateReport(reportData: any, test: any, user: any) {
     try {
       const modifier = { isOpen: false, response: reportData.response };
-      return this.findByIdAndUpdate(reportData.id, { $set: modifier }, { new: true, runValidators: true })
+      const report = await this.findByIdAndUpdate(reportData.id, { $set: modifier }, { new: true, runValidators: true })
         .setOptions({ lean: true });
+      Event.createEvent({
+        userId: test.user._id,
+        fromUser: user._id,
+        name: `Response on ${test.exam.name}`,
+        description: `${user.displayName}: ${reportData.response}`,
+        link: `student/test/${test.slug}/#reports`,
+        type: 'report',
+      });
+      return report
     } catch (error) {
       console.log(`failed to update report: ${error}`);
     }

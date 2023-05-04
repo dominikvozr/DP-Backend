@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get('/show/:id', async (req: any, res: any) => {
 	try {
-		res.json(Report.getReport(req.params.id))
+		res.json(Report.getReport(req.params.id, req.user))
 	} catch (err) {
 		console.error(err);
 		res.status(500).send('Error fetching report');
@@ -15,7 +15,7 @@ router.get('/show/:id', async (req: any, res: any) => {
 
 router.get('/index/test/:id', async (req: any, res: any) => {
 	try {
-		res.json(Report.getTestReports(req.params.id))
+		res.json(Report.getTestReports(req.params.id, req.user))
 	} catch (err) {
 		console.error(err);
 		res.status(500).send('Error fetching report');
@@ -43,7 +43,7 @@ router.put('/update', async (req: any, res: any) => {
 		for (const id in req.body.data) {
 			if (Object.prototype.hasOwnProperty.call(req.body.data, id)) {
 				const response = req.body.data[id];
-				await Report.updateReport({ id, response })
+				await Report.updateReport({ id, response }, test, req.user)
 			}
 		}
 		res.json('success')
