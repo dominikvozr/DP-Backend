@@ -1,6 +1,7 @@
 import {Request, Response, Router} from 'express';
 import axios, { AxiosError } from 'axios';
 import {setSessionTokenHeader} from "./users";
+import {createMailData, transporter} from "./utils/utils";
 const router = Router();
 
 const API_BASE_URL = 'http://bawix.xyz:81/api/v2';
@@ -58,7 +59,6 @@ router.get('/session/:username/:workspace',setSessionTokenHeader, async (req: Re
         const token = user['coderSessionToken']
         // const workspace = `http://bawix.xyz:81/login?redirect=%2F%40${req.params.username}%2F${req.params.workspace}.main%2Fapps%2Fcode-server`;
         const workspace = `http://bawix.xyz:81/@${req.params.username}/${req.params.workspace}.main/apps/code-server/`
-
         const response= {
             email:email,
             password:password,
@@ -66,6 +66,22 @@ router.get('/session/:username/:workspace',setSessionTokenHeader, async (req: Re
             sessionToken: token
         }
         res.json(JSON.stringify(response));
+    } catch (error) {
+        handleAxiosError(error, res);
+    }
+});
+router.post('/session/email',setSessionTokenHeader, async (req: Request, res: Response) => {
+    try {
+        const user = req.user.valueOf();
+        const email = user['email'];
+        const password= user['sessionPass'];
+        const mailOption = createMailData(email,password)
+        transporter.sendMail(mailOption,function (err, info) {
+            if(err)
+                res.json({error:err})
+            else
+                res.json(info)
+        });
     } catch (error) {
         handleAxiosError(error, res);
     }

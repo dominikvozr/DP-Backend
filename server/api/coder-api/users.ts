@@ -127,23 +127,32 @@ router.post('/users/login',setSessionTokenCookie,setUserCookie,setORGCookie,
     }
 });
 
-// For dev purposes only
-router.get('/dev-login',setSessionTokenCookie, async (req: Request, res: Response) => {
+router.post('/users/password',setSessionTokenHeader, setSessionTokenCookie,setUserCookie,setORGCookie, async (req: Request, res: Response) => {
     try {
         const user = req.user.valueOf()
-        const data = {
-            email: user['email'],
-            password: "FgDiP20q12"
+        const UUID = user['coderId'];
+        const SESSION_TOKEN = user['coderSessionToken']
+        const oldPass = user['sessionPass'];
+        const newPass = generator.generate({
+            length: 10,
+            numbers: true
+        })
+        const body = {
+            old_password: oldPass,
+            password: newPass
         }
-        const response = await axios.post(`${API_BASE_URL}/users/login`, JSON.stringify(data));
-        SESSION_TOKEN = response.data.session_token; // Update session token
-        res.cookie('coder_session_token', SESSION_TOKEN);
-        res.send(`You are logged in, your session token is: ${SESSION_TOKEN}`);
-    } catch (error) {
+        const response = await axios.post(`${API_BASE_URL}/users/${UUID}/password`, body, {
+            headers: {
+                'Coder-Session-Token': SESSION_TOKEN
+            }
+        });
+        await User.updatePass({userId:UUID,newPass:newPass});
+        res.json(response.data);
+
+    }catch (error){
         handleAxiosError(error, res);
     }
 });
-
 // Route to logout user
 router.post('/users/logout',setSessionTokenHeader, setSessionTokenCookie,setUserCookie,setORGCookie, async (req: Request, res: Response) => {
     try {

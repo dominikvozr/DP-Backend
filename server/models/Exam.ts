@@ -68,6 +68,18 @@ const examSchema = new mongoose.Schema({
     name: String,
     points: Number,
   }],
+  workSpaceCPU:{
+    type: Number,
+    required: true
+  },
+  workSpaceMemory:{
+    type: Number,
+    required: true
+  },
+  workSpaceDisk:{
+    type: Number,
+    required: true
+  },
   isOpen: Boolean
 });
 
@@ -90,6 +102,9 @@ interface ExamDocument extends mongoose.Document {
     name: string,
     points: number,
   }],
+  workSpaceCPU: number,
+  workSpaceMemory: number,
+  workSpaceDisk:number,
   isOpen: boolean,
 }
 
@@ -119,6 +134,9 @@ interface ExamModel extends mongoose.Model<ExamDocument> {
     createdAt,
     points,
     tests,
+    workSpaceCPU,
+    workSpaceMemory,
+    workSpaceDisk,
   }: {
     name: string,
     userId: string,
@@ -134,6 +152,9 @@ interface ExamModel extends mongoose.Model<ExamDocument> {
     createdAt: Date,
     points: number,
     tests: Array<object>,
+    workSpaceCPU: number,
+    workSpaceMemory: number,
+    workSpaceDisk:number,
   }): Promise<ExamDocument[]>;
 
   createExam(data: ExamDocument, user: Express.User, slug: string): Promise<ExamDocument[]>;
