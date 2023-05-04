@@ -19,7 +19,7 @@ router.post('/', setSessionTokenHeader, async (req: Request, res: Response) => {
         const UUID = user['coderId'];
         const sessionToken = user['coderSessionToken']
         const API_BASE_URL = `http://bawix.xyz:81/api/v2/organizations/${ORG}/members/${UUID}`;
-        const response = await axios.post(`${API_BASE_URL}/workspaces`, req.body,{
+        const response = await axios.post(`${API_BASE_URL}/workspaces`, JSON.stringify(req.body),{
             headers: {
                 'Coder-Session-Token': sessionToken
             }
