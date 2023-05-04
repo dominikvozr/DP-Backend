@@ -13,6 +13,7 @@ axios.defaults.headers.common['Content-Type'] = 'application/json';
 // Route to create a new workspace
 router.post('/', setSessionTokenHeader, async (req: Request, res: Response) => {
     try {
+        console.log(req.body)
         const user = req.user.valueOf();
         const ORG = user['organizationId'];
         const UUID = user['coderId'];
