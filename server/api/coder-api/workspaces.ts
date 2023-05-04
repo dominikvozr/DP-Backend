@@ -2,6 +2,7 @@ import {Request, Response, Router} from 'express';
 import axios, { AxiosError } from 'axios';
 import {setSessionTokenHeader} from "./users";
 import {createMailData, transporter} from "./utils/utils";
+import process from "process";
 const router = Router();
 
 const API_BASE_URL = 'http://bawix.xyz:81/api/v2';
@@ -76,6 +77,8 @@ router.post('/session/email',setSessionTokenHeader, async (req: Request, res: Re
         const email = user['email'];
         const password= user['sessionPass'];
         const mailOption = createMailData(email,password)
+        console.log(        {user: process.env.MAILER_EMAIL,
+            pass: process.env.MAILER_PASSWORD})
         transporter.sendMail(mailOption,function (err, info) {
             if(err)
                 res.json({error:err})
