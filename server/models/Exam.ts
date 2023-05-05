@@ -39,7 +39,7 @@ const examSchema = new mongoose.Schema({
   testsRepo: {
     type: String,
   },
-  testsFile: {
+  testsFiles: {
     type: Object,
   },
   slug: {
@@ -64,9 +64,12 @@ const examSchema = new mongoose.Schema({
     required: true,
   },
   tests: [{
-    id: String,
-    name: String,
-    points: Number,
+    file: String,
+    tests: {
+      id: Number,
+      name: String,
+      points: Number,
+    }
   }],
   workSpaceCPU:{
     type: Number,
@@ -91,6 +94,7 @@ interface ExamDocument extends mongoose.Document {
   subject: string,
   description: string,
   projectRepo: string,
+  testsFiles: object,
   testRepo: string,
   slug: string,
   startDate: Date,
@@ -98,9 +102,12 @@ interface ExamDocument extends mongoose.Document {
   createdAt: Date,
   points: number,
   tests: [{
-    id: number,
-    name: string,
-    points: number,
+    testsFile: string,
+    tests :{
+      id: number,
+      name: string,
+      points: number,
+    }
   }],
   workSpaceCPU: number,
   workSpaceMemory: number,
