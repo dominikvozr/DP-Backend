@@ -199,7 +199,7 @@ router.post('/upload/tests', upload.array('tests'), (req: MulterRequest, res, ne
 
         if (getNextLine && m) {
           const testName = m[1];
-          matches.push({ id, name: `${packageMatch}.${classMatch}_${testName}()` });
+          matches.push({ id, name: `${testName}()` });
           id++;
         }
         if (match) {

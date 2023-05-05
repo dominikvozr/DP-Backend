@@ -230,10 +230,26 @@ class TestClass extends mongoose.Model {
       .setOptions({ lean: true }); */
   }
 
-  public static async setTestResults(testId: string, results: Score) {
+  public static async setTestResults(testId: string, results: any) {
     const test = await this.getTestById(testId, null);
-    const dbResults = createResults(test, results)
-    const modifier = { score: dbResults, isOpen: false };
+    const dbResults = []
+    let mainPoints = 0
+
+    for (const result of results) {
+      const { testResults, points } = createResults(test, result)
+      dbResults.push(testResults)
+      mainPoints += points
+    }
+    const score = {
+      tests: dbResults,
+      message: JSON.stringify(dbResults),
+      points: mainPoints,
+      percentage: (mainPoints / test.exam.points * 100).toFixed(2),
+      mark: '',
+      time: new Date(),
+    }
+
+    const modifier = { score, isOpen: false };
     const updatedTest = await this.findByIdAndUpdate(testId, { $set: modifier }, { new: true, runValidators: true })
       .setOptions({ lean: true });
     Event.createEvent({
@@ -247,16 +263,31 @@ class TestClass extends mongoose.Model {
   }
 }
 
-function createResults(test: any, testResults) {
-  const testArr = test.exam.tests
+function findTests(tests: any, classname: string) {
+  for (const test of tests) {
+    if (test.testsFile.classname === classname) {
+      return test
+    }
+  }
+  throw new Error("tests by classname were not found!");
+}
+
+function createResults (test: any, testResults): { testResults: { tests: { name: string, points: number }[], testsFile: object }, points: number}  {
+  let testArr: { tests: { name: string, points: number }[], testsFile: object };
+  try {
+    testArr = findTests(test.exam.tests, testResults.classname)
+  } catch (error) {
+    console.error('error while catching tests array: ' + error)
+  }
+  //const classname = test.exam.testsFile.classname
   let points = 0;
-  testResults.map((result, index) => {
-    if (!result.result){
+  testResults.tests.map((result, index) => {
+    if (result.failure){
       testResults[index].value = 0
       return
     }
 
-    const test = testArr[index];
+    const test: {name: string, points: number} = testArr.tests.find((tt: {name: string}) => tt.name == result.name) //testArr[index];
     if (!test)
       throw new Error(`Unable to find test name: '${result.name}' while evaluating`)
 
@@ -264,12 +295,8 @@ function createResults(test: any, testResults) {
       testResults[index].value = test.points
   });
   return {
-      tests: testResults,
-      points,
-      message: JSON.stringify(testResults),
-      percentage: (points / test.exam.points * 100).toFixed(2),
-      mark: '',
-      time: new Date(),
+      testResults,
+      points
   }
 }
 
