@@ -49,7 +49,7 @@ router.post('/evaluate', async (req: any, res: any) => {
     await Gitea.preparePipeline(pipelineRepoName, repoName, adminAccessToken, tempDir, test._id)
 
     // Select all files in the directory except those starting with '.!'
-    const files = await new Promise((resolve, reject) => {
+    const files: string[] = await new Promise((resolve, reject) => {
       glob(path.join(tempDir, '*'), {ignore: '.!**'}, (err, matches) => {
         if (err) {
           reject(err);
@@ -84,8 +84,8 @@ router.post('/evaluate', async (req: any, res: any) => {
 // API endpoint for handling test results
 router.post('/results', (req, res) => {
   try {
-    Test.setTestResults(req.body.testId, req.body.results)
     console.log('Test Results:', req.body.results);
+    Test.setTestResults(req.body.testId, req.body.results)
     // Send a response
     res.status(200).send({ message: 'Test results received successfully.' });
   } catch (error) {

@@ -67,12 +67,15 @@ const examSchema = new mongoose.Schema({
     required: true,
   },
   tests: [{
-    file: String,
-    tests: {
+    testsFile: Object,
+    tests: [{
       id: Number,
       name: String,
-      points: Number,
-    }
+      points: {
+        type: Number,
+        default: 0,
+      },
+    }]
   }],
   workSpaceCPU:{
     type: Number,
@@ -106,12 +109,12 @@ interface ExamDocument extends mongoose.Document {
   createdAt: Date,
   points: number,
   tests: [{
-    testsFile: string,
-    tests :{
+    testsFile: object,
+    tests: [{
       id: number,
       name: string,
       points: number,
-    }
+    }]
   }],
   workSpaceCPU: number,
   workSpaceMemory: number,

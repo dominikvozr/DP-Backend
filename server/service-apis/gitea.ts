@@ -93,18 +93,7 @@ export default class Gitea {
     try {
       const testsPath = path.join(destinationDir, 'tests_repo')
       await git().clone(`http://${token}@bawix.xyz:81/gitea/${repo}.git`, testsPath);
-        const sourceDir = testsPath;
-        fs.readdir(sourceDir, (err, files) => {
-        if (err) throw err;
-        files.forEach(file => {
-          if (file.startsWith('tests')) {
-            const sourceFilePath = path.join(sourceDir, file);
-            const destinationFilePath = path.join(destinationDir, file);
-            fs.copyFileSync(sourceFilePath, destinationFilePath);
-            console.log(`${sourceFilePath} copied to ${destinationFilePath}`);
-          }
-        });
-      });
+      fs.rmSync(path.join(testsPath, '.git'), { recursive: true });
     } catch (err) {
       return err.response
     }
@@ -132,6 +121,7 @@ export default class Gitea {
         console.error('Error in updating REPO_NAME_HERE:', error);
         throw error;
       }
+      fs.rmSync(pipelinePath, { recursive: true });
     } catch (err) {
       console.error('Error in preparePipeline:', err);
       return err.response

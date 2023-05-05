@@ -96,12 +96,6 @@ router.post('/create', async (req: any, res, next) => {
   }
 });
 
-
-
-
-
-
-
 /* router.post('/create', async (req: any, res, next) => {
   try {
     const slug = await generateSlug(Exam, req.body.name);
@@ -172,7 +166,11 @@ router.post('/upload/tests', upload.array('tests'), (req: MulterRequest, res, ne
     const files = req.files;
     const regex = /@Test/i;
     const javaRegexFunc = /void\s+(\w+)\s*\(/;
+    const packageRegex = /package\s+([\w.]+)/;
+    const classRegex = /(?:public\s+)?class\s+([\w]+)/;
     const testCasesPerFile = [];
+    let packageMatch;
+    let classMatch;
 
     let filesProcessed = 0;
 
@@ -190,9 +188,18 @@ router.post('/upload/tests', upload.array('tests'), (req: MulterRequest, res, ne
         const match = regex.exec(line);
         const m = javaRegexFunc.exec(line);
 
+        const mpackageMatch = packageRegex.exec(line);
+        const mclassMatch = classRegex.exec(line);
+
+        if (mpackageMatch)
+          packageMatch = mpackageMatch[1]
+
+        if (mclassMatch)
+          classMatch = mclassMatch[1]
+
         if (getNextLine && m) {
           const testName = m[1];
-          matches.push({ id, name: `${testName}()` });
+          matches.push({ id, name: `${packageMatch}.${classMatch}_${testName}()` });
           id++;
         }
         if (match) {
@@ -202,6 +209,7 @@ router.post('/upload/tests', upload.array('tests'), (req: MulterRequest, res, ne
 
       rl.on('close', () => {
         filesProcessed++;
+        file['classname'] = `${packageMatch}.${classMatch}`
         testCasesPerFile.push({ testsFile: file, tests: matches });
         if (filesProcessed === files.length) {
           res.json({ files: testCasesPerFile });
