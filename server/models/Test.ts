@@ -233,8 +233,6 @@ class TestClass extends mongoose.Model {
     const dbResults = []
     let mainPoints = 0
     console.log('results: ' + results);
-    results = JSON.parse(results)
-
     for (const result of results) {
       console.log('result: ' + result);
       const { testResults, points } = createResults(test, result)
