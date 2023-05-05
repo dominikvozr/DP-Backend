@@ -33,6 +33,9 @@ const examSchema = new mongoose.Schema({
   projectRepo: {
     type: String,
   },
+  mainFile: {
+    type: String,
+  },
   project: {
     type: Object,
   },
@@ -93,6 +96,7 @@ interface ExamDocument extends mongoose.Document {
   templateId: string,
   subject: string,
   description: string,
+  mainFile: string,
   projectRepo: string,
   testsFiles: object,
   testRepo: string,
