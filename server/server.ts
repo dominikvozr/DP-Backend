@@ -17,6 +17,7 @@ import apiRouter from './api';
 // eslint-disable-next-line
 require('dotenv').config();
 
+mongoose.set('strictQuery', false);
 const username = process.env.MONGO_USERNAME;
 const password = encodeURIComponent(process.env.MONGO_PASSWORD);
 const database = process.env.MONGO_DATABASE;
@@ -25,7 +26,6 @@ const mongoPort = process.env.MONGO_PORT;
 
 const uri = `mongodb://${username}:${password}@${mongoService}:${mongoPort}/${database}?retryWrites=true&w=majority`;
 
-mongoose.set('strictQuery', false);
 mongoose.connect(uri);
 // for development purpose only
 // mongoose.connect(process.env.MONGO_DB_TEST);
