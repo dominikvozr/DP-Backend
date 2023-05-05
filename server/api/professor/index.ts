@@ -51,7 +51,7 @@ router.post('/create', async (req: any, res, next) => {
     // { testsFile: file, tests: matches }
     fs.mkdirSync(testsFolder, { recursive: true })
     for (const test of req.body.tests) {
-      fs.rename(test.testFile.path, path.join(testsFolder, test.testFile.originalname), function (err) {
+      fs.rename(test.testsFile.path, path.join(testsFolder, test.testsFile.originalname), function (err) {
         if (err) throw err
       })
     }
