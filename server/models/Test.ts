@@ -130,8 +130,6 @@ class TestClass extends mongoose.Model {
       return test
     else
       return {status: 'forbidden', isAuthenticated: false} */
-      console.log(test);
-
       return test
   }
 
@@ -234,8 +232,11 @@ class TestClass extends mongoose.Model {
     const test = await this.getTestById(testId, null);
     const dbResults = []
     let mainPoints = 0
+    console.log('results: ' + results);
+
 
     for (const result of results) {
+      console.log('result: ' + result);
       const { testResults, points } = createResults(test, result)
       dbResults.push(testResults)
       mainPoints += points
