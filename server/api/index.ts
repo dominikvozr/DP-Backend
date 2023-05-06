@@ -50,7 +50,7 @@ apiRouter.use('/api/v1/public', publicExpressRoutes, handleError);
 apiRouter.use('/api/v1/user', isAuthenticated, userExpressRoutes, handleError);
 apiRouter.use('/api/v1/user/git', isAuthenticated, gitExpressRoutes, handleError);
 apiRouter.use('/api/v1/professor/exam', isAuthenticated, professorExamApi, handleError);
-apiRouter.use('/api/v1/student/test', tokenAuthorize, StudentTestApi, handleError);
+apiRouter.use('/api/v1/student/test', isAuthenticated, StudentTestApi, handleError);
 apiRouter.use('/api/v1/student/evaluation', tokenAuthorize, StudentEvaluationApi, handleError);
 apiRouter.use('/api/v1/report', isAuthenticated, reportApi, handleError);
 apiRouter.use('/api/v1/event', isAuthenticated, eventApi, handleError);

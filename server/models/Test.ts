@@ -281,7 +281,6 @@ function createResults (test: any, testResults: any): { testResults: { tests: { 
   let points = 0;
 
   testResults = testResults.tests.map((result: any) => {
-    console.log(result)
     if (result.failure) {
       result['value'] = 0
       return result
