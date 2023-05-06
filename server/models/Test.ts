@@ -49,7 +49,7 @@ const testSchema = new mongoose.Schema({
     },
   ],
   score: {
-    tests: Array,
+    tests: [{ file: String, tests: Array }],
     points: Number,
     message: String,
     percentage: Number,
@@ -232,13 +232,13 @@ class TestClass extends mongoose.Model {
     const test = await this.getTestById(testId, null);
     const dbResults = []
     let mainPoints = 0
-    console.log('results: ' + results);
+
     for (const result of results) {
-      console.log('result: ' + result);
       const { testResults, points } = createResults(test, result)
-      dbResults.push(testResults)
+      dbResults.push({file: result.file, tests: testResults})
       mainPoints += points
     }
+
     const score = {
       tests: dbResults,
       message: JSON.stringify(dbResults),
