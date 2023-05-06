@@ -34,13 +34,6 @@ router.post('/evaluate', async (req: any, res: any) => {
     await git().clone(`http://${accessToken}@bawix.xyz:81/gitea/${repoName}.git`, tempDir);
     // setup git
     const projectRepo = git(tempDir, { config: ['user.email=studentcode@studentcode.sk', 'user.name=studentcode'] });
-    // create test branch
-    try {
-      const data = await projectRepo.checkoutLocalBranch('test');
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-    }
     // Get all files that starts with tests* to project repository
     const testsRepoName = `${test.exam.user.gitea.username}/${test.exam.slug}-test`
     await Gitea.prepareTests(testsRepoName, profAccessToken, tempDir)
@@ -62,7 +55,7 @@ router.post('/evaluate', async (req: any, res: any) => {
     // add, commit, and push changes to Gitea
     await projectRepo.add(files);
     await projectRepo.commit('Add tests and Jenkinsfile');
-    await projectRepo.push('origin', 'test', ['--force']);
+    await projectRepo.push('origin', 'master', ['--force']);
     // start evaluation process on pushed test
     await Jenkins.startEvaluate(repoName, accessToken)
     Event.createEvent({
