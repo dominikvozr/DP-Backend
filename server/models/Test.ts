@@ -271,31 +271,33 @@ function findTests(tests: any, classname: string) {
   throw new Error("tests by classname were not found!");
 }
 
-function createResults (test: any, testResults): { testResults: { tests: { name: string, points: number }[], testsFile: object }, points: number}  {
+function createResults (test: any, testResults: any): { testResults: { tests: { name: string, points: number }[], testsFile: object }, points: number } {
   let testArr: { tests: { name: string, points: number }[], testsFile: object };
   try {
     testArr = findTests(test.exam.tests, testResults.classname)
   } catch (error) {
     console.error('error while catching tests array: ' + error)
   }
-  //const classname = test.exam.testsFile.classname
   let points = 0;
-  testResults.tests.map((result, index) => {
-    if (result.failure){
-      testResults[index].value = 0
-      return
+
+  testResults = testResults.tests.map((result: any) => {
+    console.log(result)
+    if (result.failure) {
+      result['value'] = 0
+      return result
     }
 
-    const test: {name: string, points: number} = testArr.tests.find((tt: {name: string}) => tt.name == result.name) //testArr[index];
+    const test: { name: string, points: number } = testArr.tests.find((tt: { name: string }) => tt.name == result.name) //testArr[index];
     if (!test)
       throw new Error(`Unable to find test name: '${result.name}' while evaluating`)
 
-      points += test.points;
-      testResults[index].value = test.points
+    points += test.points;
+    result['value'] = test.points
+    return result
   });
   return {
-      testResults,
-      points
+    testResults,
+    points
   }
 }
 
