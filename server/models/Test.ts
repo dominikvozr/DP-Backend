@@ -215,6 +215,7 @@ class TestClass extends mongoose.Model {
     if (test.exam.user.id !== user.id) return 'forbidden'
 
     let points = 0
+    const tests = test.score.tests
 
     /* for (const i in testScore) {
       if (Object.prototype.hasOwnProperty.call(testScore, i)) {
@@ -228,19 +229,20 @@ class TestClass extends mongoose.Model {
       }
     } */
 
-    for (const [index, testFile] of test.score.tests.entries()) {
+    for (const [index, testFile] of tests.entries()) {
       for (const [idx, _tt] of testFile.tests.entries()) {
         if (testScore[index] && testScore[index][idx])
-          test.score.tests[index].tests[idx].value = parseInt(testScore[index][idx])
-        points += test.score.tests[index].tests[idx].value
+          tests[index].tests[idx].value = parseInt(testScore[index][idx])
+        points += tests[index].tests[idx].value
       }
     }
     //test.score = test.score.tests
 
     test.score.points = points;
     test.score.percentage = (points / test.exam.points) * 100;
-
+    test.score.tests = tests
     test.save();
+
     Event.createEvent({
       userId: test.user._id,
       fromUser: user._id,
