@@ -232,7 +232,7 @@ class TestClass extends mongoose.Model {
 
     for (const [index, testFile] of tests.entries()) {
       for (const [idx, _tt] of testFile.tests.entries()) {
-        if (testScore[index] && testScore[index][idx] != undefined) {
+        if (testScore[index] !== undefined && testScore[index][idx] !== undefined) {
           tests[index].tests[idx].value = parseInt(testScore[index][idx])
           tests[index].tests[idx].passed = tests[index].tests[idx].value > 0
         }
