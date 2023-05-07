@@ -53,7 +53,7 @@ router.post('/evaluate', async (req: any, res: any) => {
     });
 
     // add, commit, and push changes to Gitea
-    await projectRepo.add(files);
+    await projectRepo.add('-f', files);
     await projectRepo.commit('Add tests and Jenkinsfile');
     await projectRepo.push('origin', 'master', ['--force']);
     // start evaluation process on pushed test
