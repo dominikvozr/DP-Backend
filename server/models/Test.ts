@@ -91,7 +91,7 @@ interface TestModel extends mongoose.Model<TestDocument> {
 
   getTestByExamSlug(id: string, user: any): Promise<TestDocument>;
 
-  updateTestResults(testId: string, results: Score, user: any): Promise<TestDocument>;
+  updateTestResults(testId: string, testScore: Score, user: any): Promise<TestDocument>;
 
   setTestResults(testId: string, results: Score): Promise<TestDocument>;
 
@@ -205,7 +205,7 @@ class TestClass extends mongoose.Model {
     return test
   }
 
-  public static async updateTestResults(testId, testData: any, user: any) {
+  public static async updateTestResults(testId, testScore: any, user: any) {
     const test = await this.findById(testId).populate({
       path: 'exam',
       populate: [
@@ -213,7 +213,7 @@ class TestClass extends mongoose.Model {
       ],
     });
     if (test.exam.user.id !== user.id) return 'forbidden'
-    test.score = testData.score;
+    test.score = testScore;
     test.save();
     Event.createEvent({
       userId: test.user._id,
