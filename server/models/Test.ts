@@ -81,7 +81,7 @@ interface TestDocument extends mongoose.Document {
   endedAt: Date,
   score: {
     tests: [{
-      file: String,
+      file: string,
       tests: [{
         name: string,
         classname: string,
@@ -90,6 +90,7 @@ interface TestDocument extends mongoose.Document {
         passed: boolean,
       }]
     }],
+  }
   isOpen: boolean,
 }
 
