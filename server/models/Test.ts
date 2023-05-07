@@ -213,7 +213,33 @@ class TestClass extends mongoose.Model {
       ],
     });
     if (test.exam.user.id !== user.id) return 'forbidden'
-    test.score = testScore;
+
+    let points = 0
+
+    /* for (const i in testScore) {
+      if (Object.prototype.hasOwnProperty.call(testScore, i)) {
+        const tests = testScore[i];
+        for (const j in tests) {
+          if (Object.prototype.hasOwnProperty.call(tests, j)) {
+            const value = parseInt(tests[j]);
+            test.score.tests[i].tests[j].value = value
+          }
+        }
+      }
+    } */
+
+    for (const [index, testFile] of test.score.tests.entries()) {
+      for (const [idx, _tt] of testFile.tests.entries()) {
+        if (testScore[index] && testScore[index][idx])
+          test.score.tests[index].tests[idx].value = parseInt(testScore[index][idx])
+        points += test.score.tests[index].tests[idx].value
+      }
+    }
+    //test.score = test.score.tests
+
+    test.score.points = points;
+    test.score.percentage = (points / test.exam.points) * 100;
+
     test.save();
     Event.createEvent({
       userId: test.user._id,
