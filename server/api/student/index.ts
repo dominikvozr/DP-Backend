@@ -76,21 +76,10 @@ router.get('/exam/:slug', async (req, res, next) => {
 router.put('/update/score/:id', async (req, res, next) => {
   try {
     const result = await Test.updateTestResults(req.params.id, req.body, req.user);
-    console.log(result);
-    res.json({result: 'success'});
+    res.json({result, message: 'success'});
   } catch (err) {
     next(err);
   }
 })
-
-/* router.get('/delete/:id', async (req, res, next) => {
-  try {
-    const result = await Test.deleteTest(req.params.id, req.user);
-    console.log(result);
-    res.json({result: 'success'});
-  } catch (err) {
-    next(err);
-  }
-}) */
 
 export default router;

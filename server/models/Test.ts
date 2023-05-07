@@ -183,9 +183,7 @@ class TestClass extends mongoose.Model {
   }
 
   public static async checkIfExists(exam, user) {
-    console.log('Checking if test with same id exist in user');
     const resp = await this.find({user: user._id, exam: exam._id})
-    console.log(resp);
     if(!isEmpty(resp)) return true
     return false
   }
@@ -194,7 +192,6 @@ class TestClass extends mongoose.Model {
     // TODO uncomment code below in production
     const checked = await this.checkIfExists(exam, user)
     if (checked) {
-      console.error('test already exists');
       throw Error('test already exists')
     }
     const data = {
@@ -235,7 +232,7 @@ class TestClass extends mongoose.Model {
 
     for (const [index, testFile] of tests.entries()) {
       for (const [idx, _tt] of testFile.tests.entries()) {
-        if (testScore[index] && testScore[index][idx]) {
+        if (testScore[index] && testScore[index][idx] != undefined) {
           tests[index].tests[idx].value = parseInt(testScore[index][idx])
           tests[index].tests[idx].passed = tests[index].tests[idx].value > 0
         }
