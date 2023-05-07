@@ -49,7 +49,19 @@ const testSchema = new mongoose.Schema({
     },
   ],
   score: {
-    tests: [{ file: String, tests: Array }],
+    tests: [{
+      file: String,
+      tests:[{
+        name: String,
+        classname: String,
+        failure: String,
+        value: {
+          type: Number,
+          default: 0,
+        },
+        passed: Boolean,
+      }]
+    }],
     points: Number,
     message: String,
     percentage: Number,
@@ -68,13 +80,16 @@ interface TestDocument extends mongoose.Document {
   startedAt: Date,
   endedAt: Date,
   score: {
-    tests: [],
-    points: number,
-    message: string,
-    percentage: number,
-    mark: string,
-    time: Date,
-  },
+    tests: [{
+      file: String,
+      tests: [{
+        name: string,
+        classname: string,
+        failure: string,
+        value: number,
+        passed: boolean,
+      }]
+    }],
   isOpen: boolean,
 }
 
@@ -217,26 +232,15 @@ class TestClass extends mongoose.Model {
     let points = 0
     const tests = test.score.tests
 
-    /* for (const i in testScore) {
-      if (Object.prototype.hasOwnProperty.call(testScore, i)) {
-        const tests = testScore[i];
-        for (const j in tests) {
-          if (Object.prototype.hasOwnProperty.call(tests, j)) {
-            const value = parseInt(tests[j]);
-            test.score.tests[i].tests[j].value = value
-          }
-        }
-      }
-    } */
-
     for (const [index, testFile] of tests.entries()) {
       for (const [idx, _tt] of testFile.tests.entries()) {
-        if (testScore[index] && testScore[index][idx])
+        if (testScore[index] && testScore[index][idx]) {
           tests[index].tests[idx].value = parseInt(testScore[index][idx])
+          tests[index].tests[idx].passed = tests[index].tests[idx].value > 0
+        }
         points += tests[index].tests[idx].value
       }
     }
-    //test.score = test.score.tests
 
     test.score.points = points;
     test.score.percentage = (points / test.exam.points) * 100;
