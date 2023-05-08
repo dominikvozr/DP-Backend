@@ -31,18 +31,18 @@ router.post('/create', async (req: any, res: any) => {
 	}
 });
 
-router.put('/update', async (req: any, res: any) => {
+router.put('/update/:id', async (req: any, res: any) => {
 	try {
-		const test: any = await Test.findById(req.body.testId).populate({
+		const test: any = await Test.findById(req.params.id).populate({
 			path: 'exam',
 			populate: [
 				{ path: 'user' }
 			],
 		})
 		if (test.exam.user.id !== req.user.id) throw new Error('this test doesn\'t belong authenticated user');
-		for (const id in req.body.data) {
-			if (Object.prototype.hasOwnProperty.call(req.body.data, id)) {
-				const response = req.body.data[id];
+		for (const id in req.body) {
+			if (Object.prototype.hasOwnProperty.call(req.body, id)) {
+				const response = req.body[id];
 				await Report.updateReport({ id, response }, test, req.user)
 			}
 		}

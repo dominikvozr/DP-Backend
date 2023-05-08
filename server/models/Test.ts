@@ -97,7 +97,7 @@ interface TestDocument extends mongoose.Document {
 interface TestModel extends mongoose.Model<TestDocument> {
   getTestsByUser({ userId }: { userId: string }): Promise<TestDocument[]>;
 
-  getTests(user: any): Promise<TestDocument[]>;
+  getTests(user: any, page: number): Promise<{tests: TestDocument[], testsCount: number}>;
 
   getTestsByExam(examId: string, user: any): Promise<TestDocument[]>;
 
@@ -123,12 +123,17 @@ interface TestModel extends mongoose.Model<TestDocument> {
 }
 
 class TestClass extends mongoose.Model {
-  public static async getTests(user: any) {
-    const exams = await this.find({ 'user': user._id })
+  public static async getTests(user: any, page: number | null) {
+    const limit = 8
+    const skip = page ? (page - 1) * limit : 0
+    const testsCount = await this.find({ 'user': user._id }).count()
+    const tests = await this.find({ 'user': user._id })
       .populate('user')
       .populate('exam')
       .sort({ startedAt: 'desc' })
-    return exams
+      .skip(skip)
+      .limit(limit)
+    return { tests, testsCount }
   }
 
   public static async getTestById(id: string, _user: any) {

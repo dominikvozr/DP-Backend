@@ -117,10 +117,10 @@ class ReportClass extends mongoose.Model {
       Event.createEvent({
         userId: test.user._id,
         fromUser: user._id,
-        name: `Response on ${test.exam.name}`,
+        name: `Report Response on ${test.exam.name}`,
         description: `${user.displayName}: ${reportData.response}`,
         link: `student/test/${test.slug}/#reports`,
-        type: 'report',
+        type: 'reportResponse',
       });
       return report
     } catch (error) {

@@ -184,7 +184,7 @@ class ExamClass extends mongoose.Model {
   public static async getExams(user: any, page: number | null) {
     const limit = 8
     const skip = page ? (page-1) * limit : 0
-    const examsCount = await this.count()
+    const examsCount = await this.find({ 'user': user._id }).count()
     const exams = await this.find({'user': user._id})
       .populate('user')
       .sort({createdAt: 'desc'})
