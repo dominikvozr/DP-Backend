@@ -3,7 +3,6 @@ import * as express from 'express';
 import rimraf from 'rimraf';
 import Exam from './../../models/Exam';
 import Test from './../../models/Test';
-import User from './../../models/User';
 import Gitea from '../../service-apis/gitea';
 import { generateSlug } from './../../utils/slugify';
 const path = require('path');
@@ -18,14 +17,13 @@ const router = express.Router();
 */
 router.post('/create', async (req: any, res, next) => {
   // create repository
-  const user: any = await User.findById(req.body.user._id)
-  const exam: any = await Exam.findById(req.body.exam._id).populate('user')
+  const exam: any = await Exam.findById(req.body.examId).populate('user')
   const slug = await generateSlug(Test, exam.slug);
-  const accessToken = user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
+  const accessToken = req.user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
   const examRepoName = `${exam.user.gitea.username}/${exam.slug}-exam` // ${req.body.exam.user.gitea.username}
-  const studentRepoName = `${user.gitea.username}/${slug}-student` // ${req.exam.user.gitea.username}
-  const studentAccessToken = user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
-  const response = await Gitea.createRepo(user.gitea.username, `${slug}-student`, studentAccessToken)
+  const studentRepoName = `${req.user.gitea.username}/${slug}-student` // ${req.exam.user.gitea.username}
+  const studentAccessToken = req.user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
+  const response = await Gitea.createRepo(req.user.gitea.username, `${slug}-student`, studentAccessToken)
   // repository already exists
   if (response.status === 409) {}
   try {
@@ -38,7 +36,7 @@ router.post('/create', async (req: any, res, next) => {
     // delete projectb
     await rimraf(tempDir);
     // create test
-    const test = await Test.createTest(exam, user, slug);
+    const test = await Test.createTest(exam, req.user, slug);
     res.json({test, message: 'success'});
   } catch (err) {
     next(err);
