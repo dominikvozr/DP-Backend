@@ -47,8 +47,6 @@ router.get('/index', async (req, res, next) => {
   try {
     const page = parseInt(req.query.page.toString())
     const { tests, testsCount }: { tests: object[], testsCount: number } = await Test.getTests(req.user, page);
-    console.log(tests);
-
     res.json({isAuthorized: req.user ? true : false, user: req.user || null, tests, testsCount});
   } catch (err) {
     next(err);

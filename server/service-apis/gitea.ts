@@ -24,15 +24,13 @@ export default class Gitea {
       return examRepoResponse
     } catch (err) {
       try {
-        const repos = await axios.delete(`${process.env.GITEA_URL}/api/v1/repos/${username}/${repo}`,
+        await axios.delete(`${process.env.GITEA_URL}/api/v1/repos/${username}/${repo}`,
         {
           headers: {
             Authorization: `token ${process.env.GITEA_ADMIN_ACCESS_TOKEN}`
           }
         });
-        console.log('repos: ' + JSON.stringify(repos));
         await this.createRepo(username, repo, token)
-        console.log('repo deleted');
       } catch (error) {
         console.error(error);
         console.error(err)
@@ -72,8 +70,6 @@ export default class Gitea {
     const gitFolderPath = path.join(projectsFolder, '.git');
     const gitFolderExists = await fs.pathExists(gitFolderPath);
     console.log('reinitializeRepo function');
-    console.log(gitFolderPath, gitFolderExists);
-
     if (gitFolderExists) {
         // Delete the existing .git folder
         await fs.remove(gitFolderPath);

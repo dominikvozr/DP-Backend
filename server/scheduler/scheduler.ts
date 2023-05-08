@@ -72,12 +72,8 @@ class Scheduler {
         dateTime,
         jobData,
       });
-      console.log(queue);
 
       await fs.promises.writeFile(this.queueFile, JSON.stringify(queue));
-
-      console.log(name, dateTime, jobData);
-
       const jobName = `${name}-${id}`
       this.scheduler.add({
         name: jobName,
@@ -87,9 +83,6 @@ class Scheduler {
           workerData: jobData
         }
       })
-
-      console.log(this.scheduler.jobs);
-
       this.scheduler.run();
 
       // send email
@@ -104,7 +97,6 @@ class Scheduler {
 
   public async scheduleExamSimple(start: Date, end: Date, jobData: {examId: string}){
     console.log('Scheduling exam start and end:', start, end, jobData);
-    console.log('Server timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone);
     this.scheduleExamStart(start, jobData)
     this.scheduleExamEnd(end, jobData)
   }
@@ -118,8 +110,6 @@ class Scheduler {
 
         // Set the "isOpen" property of the document to "false"
         exam.isOpen = true;
-        console.log(start);
-        console.log(exam);
 
 
         // Save the updated document

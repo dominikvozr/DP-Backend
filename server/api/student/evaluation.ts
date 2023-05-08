@@ -18,7 +18,7 @@ router.post('/evaluate', async (req: any, res: any) => {
   try {
     test = await Test.getAdminTestById(req.body.testId)
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json(error)
   }
 
@@ -77,12 +77,11 @@ router.post('/evaluate', async (req: any, res: any) => {
 // API endpoint for handling test results
 router.post('/results', (req, res) => {
   try {
-    console.log('Test Results:', req.body.results);
     Test.setTestResults(req.body.testId, req.body.results)
     // Send a response
     res.status(200).send({ message: 'Test results received successfully.' });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).send('Error when getting results');
   }
 });

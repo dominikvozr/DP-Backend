@@ -28,7 +28,6 @@ if (!fs.existsSync(queueFile)) {
 }
 
 const queue = require(queueFile);
-console.log("aslfjkbvakjdnf", queue);
 (async() => {
     // send emails
     await Promise.all(

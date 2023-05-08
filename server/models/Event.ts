@@ -56,7 +56,7 @@ class EventClass extends mongoose.Model {
         .populate('fromUser')
       return event
     } catch (error) {
-      console.log(`failed to get event: ${error}`);
+      console.error(`failed to get event: ${error}`);
     }
   }
 
@@ -68,7 +68,7 @@ class EventClass extends mongoose.Model {
         .populate('fromUser')
       return events
     } catch (error) {
-      console.log(`failed to get events: ${error}`);
+      console.error(`failed to get events: ${error}`);
     }
   }
 /*
@@ -90,7 +90,7 @@ class EventClass extends mongoose.Model {
       }
       return await this.create(data)
     } catch (error) {
-      console.log(`failed to create event: ${error}`);
+      console.error(`failed to create event: ${error}`);
     }
   }
 
@@ -100,7 +100,7 @@ class EventClass extends mongoose.Model {
       return this.findByIdAndUpdate(id, { $set: modifier }, { new: true, runValidators: true })
         .setOptions({ lean: true });
     } catch (error) {
-      console.log(`failed to update event: ${error}`);
+      console.error(`failed to update event: ${error}`);
     }
   }
 }

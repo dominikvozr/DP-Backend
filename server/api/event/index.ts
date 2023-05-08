@@ -15,11 +15,7 @@ router.get('/index', async (req: any, res: any) => {
 
 router.put('/update/:id', async (req: any, res: any) => {
 	try {
-		console.log(req.params.id);
-
 		const event = await Event.updateEvent(req.params.id)
-		console.log(event);
-
 		res.json({event})
 	} catch (err) {
 		console.error(err);

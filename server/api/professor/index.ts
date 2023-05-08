@@ -96,66 +96,6 @@ router.post('/create', async (req: any, res, next) => {
   }
 });
 
-/* router.post('/create', async (req: any, res, next) => {
-  try {
-    const slug = await generateSlug(Exam, req.body.name);
-    const projectsFolder = path.join(__dirname, 'upload', 'projects', Math.random().toString(36).slice(-8))
-    const testsFolder = `upload/tests/${Math.random().toString(36).slice(-8)}`
-    const zipFilePath = req.body.project.path;
-    const testFilePath = req.body.testsFile.path;
-    const extension = testFilePath.split('/').pop().split('.')[1]
-    const accessToken = req.user.gitea.accessToken.sha1
-    const username = req.user.gitea.username
-
-    // create repository
-    await Gitea.createRepo(username, `${slug}-exam`, req.user.gitea.accessToken.sha1)
-    await Gitea.createRepo(username, `${slug}-test`, req.user.gitea.accessToken.sha1)
-
-    fs.mkdirSync(testsFolder, { recursive: true })
-    fs.rename(testFilePath, `${testsFolder}/tests.${extension}`, function (err) {
-      if (err) throw err
-    })
-
-    // Initialize git repository in projects folder and commit changes
-    try {
-      await Gitea.commitPushRepo(`${username}/${slug}-test`, accessToken, testsFolder, req.user.email, req.user.displayName)
-      console.log('Git repository reinitialized')
-    } catch (error) {
-      console.error('Error reinitializing Git repository:', error)
-    }
-    const rimrafRes = await rimraf(testsFolder);
-      if(rimrafRes)
-        console.log('Tests folder cleaned up');
-
-    fs.createReadStream(zipFilePath)
-      .pipe(unzipper.Extract({ path: projectsFolder }))
-      .on('close', async () => {
-        exec('ls -la ' + projectsFolder, (error, stdout, stderr) => {
-          if (error) {
-            console.error(`exec error: ${error}, stderr: ${stderr}`);
-          }
-          console.log('stdout: ' + stdout);
-        });
-        console.log('Zip file extracted successfully');
-        try {
-          await Gitea.commitPushRepo(`${username}/${slug}-exam`, accessToken, projectsFolder, req.user.email, req.user.displayName)
-          console.log('Git repository reinitialized')
-        } catch (error) {
-          console.error('Error reinitializing Git repository:', error)
-        }
-
-        const rimrafRes = await rimraf(projectsFolder);
-        if(rimrafRes)
-          console.log('Tests folder cleaned up');
-
-          const exam = await Exam.createExam(req.body, req.user, slug);
-        res.json({exam, message: 'success'});
-      });
-  } catch (err) {
-    next(err);
-  }
-}); */
-
 router.post('/upload/project', upload.single('project'), async (req: any, res) => {
       res.json(req.file)
 });
@@ -233,7 +173,6 @@ router.get('/index', async (req: IndexRequest, res, next) => {
 
 router.get('/show/:id', async (req, res, next) => {
   try {
-    console.log(req.params.id);
     const exam = await Exam.getExam(req.params.id, req.user);
     const tests = await Test.getTestsByExam(req.params.id, req.user);
     res.json({isAuthorized: req.user ? true : false, user: req.user || null, exam, tests});
@@ -253,9 +192,8 @@ router.get('/get', async (req, res, next) => {
 
 router.get('/delete/:id', async (req, res, next) => {
   try {
-    const result = await Exam.deleteExam(req.params.id, req.user);
-    console.log(result);
-    res.json({result: 'success'});
+    const exam = await Exam.deleteExam(req.params.id, req.user);
+    res.json({exam, result: 'success'});
   } catch (err) {
     next(err);
   }

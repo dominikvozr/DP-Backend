@@ -52,7 +52,7 @@ class ReportClass extends mongoose.Model {
         .populate('test')
       return report
     } catch (error) {
-      console.log(`failed to get reports: ${error}`);
+      console.error(`failed to get reports: ${error}`);
     }
   }
 
@@ -64,7 +64,7 @@ class ReportClass extends mongoose.Model {
         .populate('test')
       return reports
     } catch (error) {
-      console.log(`failed to get reports: ${error}`);
+      console.error(`failed to get reports: ${error}`);
     }
   }
 
@@ -79,12 +79,12 @@ class ReportClass extends mongoose.Model {
       }
       const report = new Report(data)
       report.save(function (err) {
-        if (err) console.log(err);
+        if (err) console.error(err);
       });
       const test: any = await Test.getTestById(reportData.testId, user)//  .findById(reportData.testId)
       test.reports.push(report._id)
       test.save(function (err) {
-        if (err) console.log(err);
+        if (err) console.error(err);
       });
       Event.createEvent({
         userId: test.exam.user._id,
@@ -96,7 +96,7 @@ class ReportClass extends mongoose.Model {
       });
       return report
     } catch (error) {
-      console.log(`failed to get reports: ${error}`);
+      console.error(`failed to get reports: ${error}`);
     }
   }
 
@@ -124,7 +124,7 @@ class ReportClass extends mongoose.Model {
       });
       return report
     } catch (error) {
-      console.log(`failed to update report: ${error}`);
+      console.error(`failed to update report: ${error}`);
     }
   }
 }

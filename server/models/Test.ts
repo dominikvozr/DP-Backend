@@ -210,7 +210,7 @@ class TestClass extends mongoose.Model {
     }
     const test = new Test(data)
     test.save(function(err) {
-      if (err) console.log(err);
+      if (err) console.error(err);
     });
     Event.createEvent({
       userId: exam.user._id,
