@@ -221,7 +221,7 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
                         'Coder-Session-Token': creatorToken
                     }
                 });
-
+        console.log(responseCreate)
         await User.updatePass({userId:newUser['id'],newPass:newPass})
 
         UUID = responseCreate.data.id; // User ID for unique calls
@@ -230,7 +230,7 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
             email: responseCreate.data.email,
             password: newPass
         }
-        const responseLogin = await axios.post(`${API_BASE_URL}/users`,  JSON.stringify(loginBody))
+        const responseLogin = await axios.post(`${API_BASE_URL}/users/login`,  JSON.stringify(loginBody))
 
         SESSION_TOKEN = responseLogin.data.session_token;
         await User.updateCoderData({userId:newUser['id'],organizationId:ORG,coderId:UUID,coderSessionToken:SESSION_TOKEN})
