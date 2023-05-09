@@ -144,7 +144,7 @@ class UserClass extends mongoose.Model {
     console.log('Static method: updatePass');
     const user = await this.findById(userId);
     user.sessionPass = newPass;
-    await user.save();
+    user.save();
 
     return user;
   }
@@ -155,7 +155,7 @@ class UserClass extends mongoose.Model {
     user.organizationId = organizationId;
     user.coderSessionToken =coderSessionToken;
     user.coderId = coderId
-    await user.save();
+    user.save();
 
     return user;
   }
