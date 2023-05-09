@@ -17,17 +17,14 @@ router.get('/evaluate', async (req, res) => {
   }
 
   console.log(examId);
-  Exam.findById(examId, function (err, exam) {
+  const exam = await Exam.findById(examId);
+  exam.isOpen = false;
+  // Save the updated document
+  exam.save(function (err) {
     if (err) return console.log(err);
-    // Set the "isOpen" property of the document to "false"
-    exam.isOpen = false;
-    // Save the updated document
-    exam.save(function (err) {
-      if (err) return console.log(err);
-      console.log('Exam updated successfully!');
-    });
+    console.log('Exam updated successfully!');
   });
-
+  console.log(exam)
   const message = await Test.evaluateTests(examId as string)
   console.log(message);
   res.json('test');

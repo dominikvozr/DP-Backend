@@ -300,7 +300,14 @@ class TestClass extends mongoose.Model {
   }
   public static async evaluateTests (examId: string): Promise<string> {
     try {
-      const tests = await this.find({ _id: examId });
+      const tests = await this.find({ exam: examId }).populate({
+          path: 'exam',
+          populate: [
+            { path: 'user' },
+            { path: 'pipeline' }
+          ],
+        })
+        .populate('user');
       console.log(tests.map(test => test.id))
       for (const test of tests) {
         test.isOpen = false;
