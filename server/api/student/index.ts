@@ -5,6 +5,7 @@ import Exam from './../../models/Exam';
 import Test from './../../models/Test';
 import Gitea from '../../service-apis/gitea';
 import { generateSlug } from './../../utils/slugify';
+import * as console from "console";
 const path = require('path');
 const router = express.Router();
 
@@ -34,16 +35,17 @@ router.post('/create', async (req: any, res, next) => {
   // repository already exists
   if (response.status === 409) {}
   try {
-    // create temp dir for repo
+    console.log("create temp dir for repo")
     const tempDir = path.join(__dirname, Math.random().toString(36).substring(2, 15))
-    // clone professor repo into tempDir
+    console.log("clone professor repo into tempDir")
     await Gitea.cloneRepoIntoDir(examRepoName, accessToken, tempDir)
-    // commit and push repo to students repo
+    console.log("commit and push repo to students repo")
     await Gitea.commitPushRepo(studentRepoName, studentAccessToken, tempDir, 'studentcode@studentcode.com', 'StudentCODE')
-    // delete projectb
+    console.log("delete project")
     await rimraf(tempDir);
-    // create test
+    console.log("create test")
     const test = await Test.createTest(exam, req.user, slug);
+    console.log("added to db")
     res.json({test, message: 'success'});
   } catch (err) {
     next(err);

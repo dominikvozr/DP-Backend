@@ -190,8 +190,6 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
             password: process.env.USER_ADMIN_PASS,
 
         }
-        console.log("user admin  body:")
-        console.log(creatorBody)
         const creatorResponse = await axios.post(`${API_BASE_URL}/users/login`,
             JSON.stringify(creatorBody));
 
@@ -203,8 +201,6 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
                     'Coder-Session-Token': creatorToken
                 }
             });
-        console.log("user admin info response:")
-        console.log(creatorInfo)
         const orgId = creatorInfo.data.organization_ids[0];
 
         const newUser = req.user.valueOf()
@@ -219,8 +215,6 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
             password: newPass,
             username: validateUsername(newUser['slug'])
         }
-        console.log("user body:")
-        console.log(newUserBody)
         const responseCreate = await axios.post(`${API_BASE_URL}/users`,  JSON.stringify(newUserBody),
                 {
                     headers: {
@@ -236,8 +230,7 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
             email: responseCreate.data.email,
             password: newPass
         }
-        console.log("login body:")
-        console.log(loginBody)
+
         const responseLogin = await axios.post(`${API_BASE_URL}/users/login`,  JSON.stringify(loginBody))
 
         SESSION_TOKEN = responseLogin.data.session_token;
