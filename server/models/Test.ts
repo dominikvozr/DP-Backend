@@ -99,7 +99,7 @@ interface TestModel extends mongoose.Model<TestDocument> {
 
   getTests(user: any, page: number): Promise<{tests: TestDocument[], testsCount: number}>;
 
-  getTestsByExam(examId: string, user: any): Promise<TestDocument[]>;
+  getTestsByExam(examId: string, _user: any): Promise<TestDocument[]>;
 
   getTestById(id: string, user: any): Promise<TestDocument>;
 
@@ -168,8 +168,8 @@ class TestClass extends mongoose.Model {
       return test
   }
 
-  public static async getTestsByExam(examId: string, user: any) {
-    const tests = await this.find({ exam: examId, user: user._id }).populate('user').populate({
+  public static async getTestsByExam(examId: string, _user: any) {
+    const tests = await this.find({ exam: examId }).populate('user').populate({
       path: 'reports',
       match: { isOpen: true },
     });
