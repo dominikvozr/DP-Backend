@@ -50,8 +50,7 @@ export default class Gitea {
 
   public static cloneRepoIntoDir = async (repo: string, token: string, dir: string) => {
     try {
-      const resp = await git().clone(`http://${token}@bawix.xyz:81/gitea/${repo}.git`, dir);
-      console.log(resp);
+      await git().clone(`http://${token}@bawix.xyz:81/gitea/${repo}.git`, dir);
       return 'success'
     } catch (err) {
       return err.response
@@ -70,7 +69,6 @@ export default class Gitea {
       return 'success'
     } catch (err) {
       console.log(err);
-
       return err.response
     }
   }
