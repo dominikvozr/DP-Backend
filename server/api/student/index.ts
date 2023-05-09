@@ -25,20 +25,18 @@ router.post('/create', async (req: any, res, next) => {
     console.error(error)
     next(error)
   }
+
   if (!exam) next('exam not found!')
   const slug = await generateSlug(Test, exam.slug);
-  const accessToken = req.user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
   const examRepoName = `${exam.user.gitea.username}/${exam.slug}-exam` // ${req.body.exam.user.gitea.username}
   const studentRepoName = `${req.user.gitea.username}/${slug}-student` // ${req.exam.user.gitea.username}
   const studentAccessToken = req.user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
-  const response = await Gitea.createRepo(req.user.gitea.username, `${slug}-student`, studentAccessToken)
-  // repository already exists
-  if (response.status === 409) {}
+  await Gitea.createRepo(req.user.gitea.username, `${slug}-student`, studentAccessToken)
   try {
     console.log("create temp dir for repo")
     const tempDir = path.join(__dirname, Math.random().toString(36).substring(2, 15))
     console.log("clone professor repo into tempDir")
-    await Gitea.cloneRepoIntoDir(examRepoName, accessToken, tempDir)
+    await Gitea.cloneAdminRepoIntoDir(examRepoName, tempDir)
     console.log("commit and push repo to students repo")
     await Gitea.commitPushRepo(studentRepoName, studentAccessToken, tempDir, 'studentcode@studentcode.com', 'StudentCODE')
     console.log("delete project")

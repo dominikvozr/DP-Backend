@@ -39,9 +39,19 @@ export default class Gitea {
     }
   }
 
+  public static cloneAdminRepoIntoDir = async (repo: string, dir: string) => {
+    try {
+      await git().clone(`http://${process.env.GITEA_ADMIN_ACCESS_TOKEN}@bawix.xyz:81/gitea/${repo}.git`, dir);
+      return 'success'
+    } catch (err) {
+      return err.response
+    }
+  }
+
   public static cloneRepoIntoDir = async (repo: string, token: string, dir: string) => {
     try {
-      await git().clone(`http://${token}@bawix.xyz:81/gitea/${repo}.git`, dir);
+      const resp = await git().clone(`http://${token}@bawix.xyz:81/gitea/${repo}.git`, dir);
+      console.log(resp);
       return 'success'
     } catch (err) {
       return err.response

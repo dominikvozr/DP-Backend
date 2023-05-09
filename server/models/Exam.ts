@@ -24,16 +24,13 @@ const examSchema = new mongoose.Schema({
   },
   subject: {
     type: String,
-    required: true,
+    default: '',
   },
   description: {
     type: String,
-    required: true,
+    default: '',
   },
   projectRepo: {
-    type: String,
-  },
-  mainFile: {
     type: String,
   },
   project: {
