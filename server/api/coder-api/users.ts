@@ -217,7 +217,7 @@ router.post('/users',setSessionTokenHeader,setUserCookie,setORGCookie, async (re
             email: newUser['email'],
             organization_id:orgId,
             password: newPass,
-            username: validateUsername(newUser['displayName'])
+            username: validateUsername(newUser['slug'])
         }
         console.log("user body:")
         console.log(newUserBody)
