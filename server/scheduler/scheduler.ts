@@ -1,4 +1,5 @@
-import Exam from "../models/Exam";
+import Test from "./../models/Test";
+import Exam from "./../models/Exam";
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require('fs');
@@ -107,7 +108,6 @@ class Scheduler {
       // Find the document you want to update (replace "id_of_exam" with the ID of the exam you want to update)
       Exam.findById(jobData.examId, function(err, exam) {
         if (err) return console.log(err);
-
         // Set the "isOpen" property of the document to "false"
         exam.isOpen = true;
 
@@ -125,23 +125,38 @@ class Scheduler {
   private async scheduleExamEnd(end: Date, jobData: {examId: string}){
     // Define the job schedule to run on a specific date and time (in this example, March 20th 2023 at 12:00:00)
       // Europe/Bratislava
-      schedule.scheduleJob({ start: end, rule: end, tz: 'Europe/Bratislava' }, function() {
+      schedule.scheduleJob({ start: end, rule: end, tz: 'Europe/Bratislava' }, async function() {
         // Find the document you want to update (replace "id_of_exam" with the ID of the exam you want to update)
         Exam.findById(jobData.examId, function(err, exam) {
           if (err) return console.log(err);
-
           // Set the "isOpen" property of the document to "false"
           exam.isOpen = false;
-          console.log(end);
-          console.log(exam);
-
-
           // Save the updated document
           exam.save(function(err) {
             if (err) return console.log(err);
             console.log('Exam updated successfully!');
           });
         });
+
+        const message = await Test.evaluateTests(jobData.examId)
+        console.log(message);
+
+        /* let test
+        try {
+          test = await Test.getAdminTestById(req.body.testId)
+        } catch (error) {
+          console.error(error);
+          res.json(error)
+        }
+        test.isOpen = false;
+        test.save()
+        const resp = await SystemEvaluation.invokeEvaluation(test)
+        if (resp.status === 200) {
+          res.json(resp.message)
+        } else {
+          res.status(500).json(resp.message)
+        } */
+
       });
       //console.log('Exam start scheduled:', endJob.nextInvocation());
   }

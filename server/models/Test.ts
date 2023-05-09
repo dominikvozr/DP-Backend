@@ -4,6 +4,7 @@ import * as mongoose from 'mongoose';
 import Exam from './Exam';
 import { isEmpty } from 'lodash';
 import Event from './Event';
+import SystemEvaluation from './../service-apis/systemEvaluation';
 
 interface Score {
     tests: [],
@@ -114,6 +115,8 @@ interface TestModel extends mongoose.Model<TestDocument> {
   createTest(exam: typeof Exam, user: Express.User, slug: string): Promise<TestDocument>;
 
   checkIfExist(exam: typeof Exam, user: Express.User): Promise<TestDocument>;
+
+  evaluateTests (examId: string): Promise<string>;
 
   deleteTest({
     id
@@ -294,6 +297,30 @@ class TestClass extends mongoose.Model {
       type: 'evaluationEnded',
     });
     return updatedTest
+  }
+  public static async evaluateTests (examId: string): Promise<string> {
+    try {
+      const tests = await this.find({ _id: examId });
+      console.log(tests.map(test => test.id))
+      for (const test of tests) {
+        test.isOpen = false;
+        // Save the updated document
+        test.save(function (err) {
+          if (err) return console.log(err);
+          console.log('Exam updated successfully!');
+        });
+
+        const resp = await SystemEvaluation.invokeEvaluation(test)
+        if (resp.status === 200) {
+          console.log(resp.message)
+        } else {
+          console.error(`Error while evaluating test(${test.id}): ${resp.message}`)
+        }
+      }
+      return 'tests evaluated successfully!'
+    } catch (error) {
+      console.error("Error while rvaluating tests: ", error)
+    }
   }
 }
 
