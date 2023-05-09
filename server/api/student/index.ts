@@ -16,8 +16,15 @@ const router = express.Router();
 }
 */
 router.post('/create', async (req: any, res, next) => {
-  // create repository
-  const exam: any = await Exam.findById(req.body.examId).populate('user')
+  let exam
+  try {
+    // create repository
+    exam = await Exam.findById(req.body.examId).populate('user')
+  } catch (error) {
+    console.error(error)
+    next(error)
+  }
+  if (!exam) next('exam not found!')
   const slug = await generateSlug(Test, exam.slug);
   const accessToken = req.user.gitea.accessToken.sha1 // ${req.user.gitea.accessToken.sha1}
   const examRepoName = `${exam.user.gitea.username}/${exam.slug}-exam` // ${req.body.exam.user.gitea.username}
