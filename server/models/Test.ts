@@ -314,7 +314,7 @@ class TestClass extends mongoose.Model {
         // Save the updated document
         test.save(function (err) {
           if (err) return console.log(err);
-          console.log('Exam updated successfully!');
+          console.log('Test updated successfully!');
         });
 
         const resp = await SystemEvaluation.invokeEvaluation(test)

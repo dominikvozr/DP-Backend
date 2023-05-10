@@ -61,7 +61,7 @@ export default class Gitea {
     try {
       const git = await this.reinitializeRepo(dir, email, displayName)
       // const projectRepo = await git(dir, { config: ['user.email=studentcode@studentcode.sk', 'user.name=studentcode'] });
-      await git.add(['-f', '.'])
+        await git.add(['-f', '.'])
       await git.commit('Initial commit')
       await git.addRemote('newRemote', `http://${token}@bawix.xyz:81/gitea/${repo}.git`);
       await git.push(['--all', '--force', 'newRemote']);

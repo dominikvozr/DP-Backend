@@ -5,7 +5,6 @@ const path = require('path');
 const git = require('simple-git');
 import Gitea from './gitea';
 import Jenkins from "./jenkins";
-const glob = require('glob');
 
 export default class SystemEvaluation {
 	public static invokeEvaluation = async (test: any) : Promise<{ status: number; message: string; }> => {
@@ -20,32 +19,13 @@ export default class SystemEvaluation {
 			// Clone project repository
 			await git().clone(`http://${accessToken}@bawix.xyz:81/gitea/${repoName}.git`, tempDir);
 			// setup git
-			const projectRepo = git(tempDir, { config: ['user.email=studentcode@studentcode.sk', 'user.name=studentcode'] });
 			// Get all files that starts with tests* to project repository
 			const testsRepoName = `${test.exam.user.gitea.username}/${test.exam.slug}-test`
 			await Gitea.prepareTests(testsRepoName, profAccessToken, tempDir)
 			// Get Jenkinsfile from the pipelines repository
 			const pipelineRepoName = `${test.exam.pipeline.slug}-pipeline`
 			await Gitea.preparePipeline(pipelineRepoName, repoName, adminAccessToken, tempDir, test._id)
-
-			// Select all files in the directory except those starting with '.!'
-			const files: string[] = await new Promise((resolve, reject) => {
-				glob(path.join(tempDir, '*'), { ignore: '.!**' }, (err, matches) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(matches);
-					}
-				});
-			});
-
-			// add, commit, and push changes to Gitea
-			await projectRepo.add('-f', files);
-			await projectRepo.commit('Add tests and Jenkinsfile');
-			await projectRepo.addRemote('newRemote', `http://${accessToken}@bawix.xyz:81/gitea/${repoName}.git`);
-			await projectRepo.push(['--all', '--force', 'newRemote']);
-			//await projectRepo.push('origin', 'master', ['--force']);
-			// start evaluation process on pushed test
+			await Gitea.commitPushRepo(repoName, accessToken, tempDir, 'studentcode@studentcode.sk', 'studentcode') //(repo: string, token: string, dir: string, email: string, displayName: string)
 			await Jenkins.startEvaluate(repoName, accessToken)
 			Event.createEvent({
 				userId: test.user._id,
