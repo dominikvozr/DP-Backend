@@ -42,7 +42,9 @@ export default class SystemEvaluation {
 			// add, commit, and push changes to Gitea
 			await projectRepo.add('-f', files);
 			await projectRepo.commit('Add tests and Jenkinsfile');
-			await projectRepo.push('origin', 'master', ['--force']);
+			await projectRepo.addRemote('newRemote', `http://${accessToken}@bawix.xyz:81/gitea/${repoName}.git`);
+			await projectRepo.push(['--all', '--force', 'newRemote']);
+			//await projectRepo.push('origin', 'master', ['--force']);
 			// start evaluation process on pushed test
 			await Jenkins.startEvaluate(repoName, accessToken)
 			Event.createEvent({
