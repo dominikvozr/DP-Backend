@@ -175,7 +175,6 @@ router.get('/show/:id', async (req, res, next) => {
   try {
     const exam = await Exam.getExam(req.params.id, req.user);
     const tests = await Test.getTestsByExam(req.params.id, req.user);
-    console.log(tests);
 
     res.json({isAuthorized: req.user ? true : false, user: req.user || null, exam, tests});
   } catch (err) {

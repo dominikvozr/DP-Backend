@@ -16,7 +16,6 @@ router.get('/evaluate', async (req, res) => {
     return
   }
 
-  console.log(examId);
   const exam = await Exam.findById(examId);
   exam.isOpen = false;
   // Save the updated document
@@ -24,9 +23,7 @@ router.get('/evaluate', async (req, res) => {
     if (err) return console.log(err);
     console.log('Exam updated successfully!');
   });
-  console.log(exam)
-  const message = await Test.evaluateTests(examId as string)
-  console.log(message);
+  await Test.evaluateTests(examId as string)
   res.json('test');
 });
 
