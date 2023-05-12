@@ -172,10 +172,7 @@ class TestClass extends mongoose.Model {
   }
 
   public static async getTestsByExam(examId: string, _user: any) {
-    const tests = await this.find({ exam: examId }).populate('user').populate({
-      path: 'reports',
-      match: { isOpen: true },
-    });
+    const tests = await this.find({ exam: examId }).populate('user').populate('reports');
     return tests
   }
 
