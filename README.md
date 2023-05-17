@@ -1,6 +1,15 @@
 # StudentCode Backend
+![online](https://img.shields.io/website?down_color=red&down_message=offline&style=plastic&up_color=green&up_message=online&url=http%3A%2F%2Fbawix.xyz%3A81%2Fapp%2F)
 ---
+![veľkosť](https://img.shields.io/github/repo-size/dominikvozr/DP-backend?color=gree&label=ve%C4%BEkos%C5%A5)
+![počet súborov](https://img.shields.io/github/directory-file-count/dominikvozr/DP-Backend?label=s%C3%BAbory&style=plastic)
+![riadkov kódu](https://img.shields.io/tokei/lines/github/dominikvozr/DP-Backend?style=plastic)
+![posledný commit](https://img.shields.io/github/last-commit/dominikvozr/DP-Backend?label=posledn%C3%BD%20commit&logo=github&style=plastic)
+![počet jazykov](https://img.shields.io/github/languages/count/dominikvozr/DP-Backend?color=azure&label=jazyky&style=plastic)
+![prevažujúci jazyk](https://img.shields.io/github/languages/top/dominikvozr/DP-Backend?color=white&logo=typescript&logoColor=white&style=plastic)
 
+
+---
 ###### SK
 
 Tento repozitár obsahuje zdrojový kód Diplomových prác **Skúškový systém - Virtualizované vývojové prostredie** a
