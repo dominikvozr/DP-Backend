@@ -8,12 +8,12 @@ Tento repozitár obsahuje zdrojový kód Diplomových prác **Skúškový systé
 ---
 ### Štruktúra zdrojového kódu
 * be-chart/ - DevOps konfiguračné funkcie na nasadenie na Kubernetes Klaster
-    * [values](values.yaml) - premenné podu.
+    * [values](be-chart/values.yaml) - premenné podu.
 * be-chart/templates/
-    * [deployment](template/deployment.yaml) - definované nasadenie na kubernetes cluster.
-    * [ingress](template/ingress.yaml) - nastavenie reverznej proxy.
-    * [service](template/service.yaml) - nastavenie služby.
-    * [service account](template/serviceaccount.yaml) - nastavenie autentifikácie
+    * [deployment](be-chart/template/deployment.yaml) - definované nasadenie na kubernetes cluster.
+    * [ingress](be-chart/template/ingress.yaml) - nastavenie reverznej proxy.
+    * [service](be-chart/template/service.yaml) - nastavenie služby.
+    * [service account](be-chart/template/serviceaccount.yaml) - nastavenie autentifikácie
 * jobs/
     * [index](jobs/index.ts) - spustenie plánovača
 * server/
