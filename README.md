@@ -1,4 +1,5 @@
 # StudentCode Backend
+<a href="https://ibb.co/Mn3Y57j"><img src="https://i.ibb.co/1ZwDJTp/banner.png" alt="banner" border="0"></a>
 ---
 ![online](https://img.shields.io/website?down_color=red&down_message=offline&style=plastic&up_color=green&up_message=online&url=http%3A%2F%2Fbawix.xyz%3A81%2Fapp%2F)
 ![veľkosť](https://img.shields.io/github/repo-size/dominikvozr/DP-backend?color=gree&label=ve%C4%BEkos%C5%A5)
