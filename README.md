@@ -2,8 +2,7 @@
 <img src="https://i.ibb.co/1ZwDJTp/banner.png" align="center" style="width: 100%" />
 </div> 
 
-# StudentCode Backend
----
+
 ![online](https://img.shields.io/website?down_color=red&down_message=offline&style=plastic&up_color=green&up_message=online&url=http%3A%2F%2Fbawix.xyz%3A81%2Fapp%2F)
 ![veľkosť](https://img.shields.io/github/repo-size/dominikvozr/DP-backend?color=gree&label=ve%C4%BEkos%C5%A5)
 ![počet súborov](https://img.shields.io/github/directory-file-count/dominikvozr/DP-Backend?label=s%C3%BAbory&style=plastic)
@@ -11,8 +10,8 @@
 ![posledný commit](https://img.shields.io/github/last-commit/dominikvozr/DP-Backend?label=posledn%C3%BD%20commit&logo=github&style=plastic)
 ![počet jazykov](https://img.shields.io/github/languages/count/dominikvozr/DP-Backend?color=azure&label=jazyky&style=plastic)
 ![prevažujúci jazyk](https://img.shields.io/github/languages/top/dominikvozr/DP-Backend?color=white&logo=typescript&logoColor=white&style=plastic)
-
-
+---
+# StudentCode Backend
 ---
 ###### SK
 
@@ -58,14 +57,20 @@ Tento repozitár obsahuje zdrojový kód Diplomových prác **Skúškový systé
     * [organizations](server/api/coder-api/organizations.ts) - manažovanie organizácií (nepoužívané)
     * [users](server/api/coder-api/users.ts) - vytváranie, prihlasovanie a manažovanie používateľov v rámci platformy Coder
     * [utils/utils](server/api/coder-api/utils/utils.ts) - pomocné funkcie
-* [server/api/event/index](server/api/event/index.ts) - posielanie a uprovanie akcií
-* [server/api/git/index](server/api/git/index.ts) - koncové body na nahrávanie súborov do repozitárov, mazanie a upravovanie repozitárov
-* [server/api/pipeline/index](server/api/pipeline/index.ts) - vytváranie pipelines na automatizované testovanie riešení
-* [server/api/professor/index](server/api/professor/index.ts) - nahrávanie zadaní, vytváranie a manažovanie testov 
+* server/api/event/
+    * [index](server/api/event/index.ts) - posielanie a uprovanie akcií
+* server/api/git/
+    * [index](server/api/git/index.ts) - koncové body na nahrávanie súborov do repozitárov, mazanie a upravovanie repozitárov
+* server/api/pipeline/
+    * [index](server/api/pipeline/index.ts) - vytváranie pipelines na automatizované testovanie riešení
+* server/api/professor/
+    * [index](server/api/professor/index.ts) - nahrávanie zadaní, vytváranie a manažovanie testov 
 * server/api/student - koncové body pre typ používateľa študent
     * [index](server/api/student/index.ts) - vytváranie testových repozitárov pre študenta, posielanie potrebných dát pre pripojenie do virtuálneho vývojového prostredia
     * [evaluation](server/api/student/evaluation.ts) - zobrazovanie vyhodnotenia riešenia a spúšťanie procesov na automatizované testovanie riešení
-* [server/api/report/index](server/api/report/index.ts) - vytváranie reportov a ich manažovanie
-* [server/utils/slugify](server/utils/slugify.ts) - pomocné funkcie na vytváranie jedinečných identifikátorov
+* server/api/report/
+    * [index](server/api/report/index.ts) - vytváranie reportov a ich manažovanie
+* server/utils/
+    * [slugify](server/utils/slugify.ts) - pomocné funkcie na vytváranie jedinečných identifikátorov
 ---
 ###### 2023
